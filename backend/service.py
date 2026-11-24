@@ -40,9 +40,11 @@ class OnboardingService:
         self.profile_basic, self.profile_full, self.return_uri = profile_basic, profile_full, return_uri
         self.recommend, self.link_income, self.clock, self.today = recommend, link_income, clock, today
 
-    def create(self, share_income: bool) -> dict:
+    def create(self, share_income: bool, return_to_app: bool = False) -> dict:
+        # With a return URI the verifier withholds status and result until the app claims with the
+        # wallet's response_code, so only ask for it when the app can actually receive the callback.
         profile = self.profile_full if share_income else self.profile_basic
-        started = self.verifier.start(profile, self.return_uri)
+        started = self.verifier.start(profile, self.return_uri if return_to_app else None)
         app_id = str(uuid.uuid4())
         app = {"id": app_id, "state": "PENDING", "transactionId": started["transactionId"],
                "shareIncome": share_income, "createdAt": int(self.clock())}
@@ -93,6 +95,11 @@ class OnboardingService:
         try:
             wallet_status = self.verifier.status(tx).get("status")
         except VerifierError as error:
+            if error.code == "RESPONSE_CODE_REQUIRED":
+                if app.get("walletStatus") != "WAITING_FOR_APP_RETURN":
+                    app["walletStatus"] = "WAITING_FOR_APP_RETURN"
+                    self._save(app)
+                return
             log.warning("application %s status call failed %s", app["id"], error.code)
             return
         if wallet_status == "COMPLETED":

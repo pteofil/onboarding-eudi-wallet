@@ -22,9 +22,12 @@ class FakeVerifier:
         self.acknowledged = []
 
     def start(self, profile, return_uri=None):
+        self.return_uri = return_uri
         return {"transactionId": "tx-1", "deepLink": "openid4vp://request"}
 
     def status(self, tx):
+        if self.needs_claim:  # the real verifier also blocks status until the app passes the response code
+            raise VerifierError(409, "RESPONSE_CODE_REQUIRED")
         return {"status": self.wallet_status}
 
     def claim(self, tx, code):
@@ -55,13 +58,13 @@ def sealed(keys, jti="jti-1", status="SATISFIED", credentials=None):
     return seal(body, signing, result_key)
 
 
-def service(keys, verifier, store=None):
+def service(keys, verifier, store=None, return_uri=None):
     _, result_key, jwks = keys
 
     def open_sealed(token, tx):
         return open_result(token, result_key, jwks, ISSUER, AUDIENCE, tx, now=NOW)
 
-    return OnboardingService(store or MemoryStore(), verifier, open_sealed, "BASIC", "FULL", None,
+    return OnboardingService(store or MemoryStore(), verifier, open_sealed, "BASIC", "FULL", return_uri,
                              provisional_recommend, provisional_link_income,
                              clock=lambda: NOW, today=lambda: date(2026, 11, 24))
 
@@ -95,12 +98,20 @@ def test_tampered_result_is_not_verified(keys):
 
 
 def test_same_device_result_waits_for_claim(keys):
-    svc = service(keys, FakeVerifier([sealed(keys)], needs_claim=True))
-    app_id = svc.create(False)["applicationId"]
+    verifier = FakeVerifier([sealed(keys)], needs_claim=True)
+    svc = service(keys, verifier, return_uri="app://cb")
+    app_id = svc.create(False, return_to_app=True)["applicationId"]
 
+    assert verifier.return_uri == "app://cb"
     assert svc.status(app_id) == {"applicationId": app_id, "status": "PENDING",
                                   "walletStatus": "WAITING_FOR_APP_RETURN"}
     assert svc.claim(app_id, "code-1")["status"] == "VERIFIED"
+
+
+def test_return_to_app_is_opt_in(keys):
+    verifier = FakeVerifier([sealed(keys)])
+    service(keys, verifier, return_uri="app://cb").create(False)
+    assert verifier.return_uri is None
 
 
 @pytest.mark.parametrize("wallet_status, expected", [
@@ -164,7 +175,7 @@ def test_stub_flow_through_lambda_handler(monkeypatch):
                                    "requestContext": {"http": {"method": method}}})
         return response["statusCode"], json.loads(response["body"])
 
-    _, created = call("POST", "/applications", {"shareIncome": True})
+    _, created = call("POST", "/applications", {"shareIncome": True, "returnToApp": True})
     assert created["deepLink"].startswith("ro.banking40.team01://same-device#response_code=")
     app = f"/applications/{created['applicationId']}"
     assert call("POST", f"{app}/claim", {"responseCode": "stub-code"})[1]["status"] == "VERIFIED"

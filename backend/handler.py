@@ -53,7 +53,7 @@ def route(service: OnboardingService, method: str, path: str, data: dict) -> dic
         match = pattern.match(path)
         if match and method == route_method:
             if action == "create":
-                return service.create(bool(data.get("shareIncome")))
+                return service.create(bool(data.get("shareIncome")), bool(data.get("returnToApp")))
             app_id = match.group(1)
             if action == "claim":
                 return service.claim(app_id, data.get("responseCode", ""))

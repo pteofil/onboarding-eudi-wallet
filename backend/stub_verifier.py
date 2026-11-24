@@ -27,7 +27,8 @@ class StubVerifier:
 
     def start(self, profile: str, return_uri: str | None = None) -> dict:
         tx = f"stub-{'full' if profile.lower().endswith('full') else 'basic'}-{uuid.uuid4()}"
-        return {"transactionId": tx, "deepLink": f"{return_uri}#response_code=stub-code"}
+        deep_link = f"{return_uri}#response_code=stub-code" if return_uri else "openid4vp://stub"
+        return {"transactionId": tx, "deepLink": deep_link}
 
     def claim(self, transaction_id: str, response_code: str) -> dict:
         return {}
