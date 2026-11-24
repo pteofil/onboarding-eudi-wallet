@@ -39,6 +39,7 @@ sealed interface Screen {
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
     data object Review : Screen // 5 Review your details
+    data object Package : Screen // 6 Your package
     data class Welcome(val confirmation: ConfirmResponse?) : Screen // 8 Welcome
     data class Error(val kind: ErrorKind) : Screen
 }
@@ -51,6 +52,8 @@ data class UiState(
     /** GET /review, loaded once the backend says VERIFIED. */
     val review: ReviewResponse? = null,
     val contact: Contact = Contact(),
+    /** Starts as the backend's recommendation; the customer may pick another eligible package. */
+    val selectedPackage: String? = null,
 )
 
 class OnboardingViewModel(
@@ -103,6 +106,7 @@ class OnboardingViewModel(
     /** System back: one step back where that makes sense, otherwise abandon the application. */
     fun back() = when (_state.value.screen) {
         Screen.Consent -> show(Screen.Start)
+        Screen.Package -> show(Screen.Review)
         else -> reset()
     }
 
@@ -116,11 +120,20 @@ class OnboardingViewModel(
         updateContact { it.copy(otp = otp.filter(Char::isDigit).take(Contact.OTP_LENGTH)) }
 
     fun continueFromReview() {
+        if (_state.value.contact.complete) show(Screen.Package)
+    }
+
+    /** Only packages the backend listed as eligible can be picked. */
+    fun selectPackage(name: String) = _state.update {
+        if (it.review?.decision?.eligible?.contains(name) == true) it.copy(selectedPackage = name) else it
+    }
+
+    fun continueFromPackage() {
         val id = applicationId ?: return
-        if (!_state.value.contact.complete) return
-        // Temporary until Your package (6) and Confirm (7) exist.
+        val selected = _state.value.selectedPackage ?: return
+        // Temporary until Confirm (7) exists.
         job?.cancel()
-        job = viewModelScope.launch { confirmRecommended(id) }
+        job = viewModelScope.launch { confirm(id, selected) }
     }
 
     fun showFormNotice() = _state.update { it.copy(showFormNotice = true) }
@@ -231,7 +244,9 @@ class OnboardingViewModel(
         show(Screen.Verifying)
         try {
             val review = api.review(id)
-            _state.update { it.copy(review = review, screen = Screen.Review) }
+            _state.update {
+                it.copy(review = review, selectedPackage = review.decision.recommended, screen = Screen.Review)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -239,11 +254,11 @@ class OnboardingViewModel(
         }
     }
 
-    private suspend fun confirmRecommended(id: String) {
+    private suspend fun confirm(id: String, packageName: String) {
         try {
-            val confirmation = api.confirm(id, ConfirmRequest())
+            val confirmation = api.confirm(id, ConfirmRequest(packageName))
             // The verified details are no longer needed once the account is opened.
-            _state.update { it.copy(screen = Screen.Welcome(confirmation), review = null, contact = Contact()) }
+            _state.update { it.copy(screen = Screen.Welcome(confirmation), review = null, contact = Contact(), selectedPackage = null) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

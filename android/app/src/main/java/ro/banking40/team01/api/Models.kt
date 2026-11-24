@@ -76,9 +76,16 @@ data class Decision(
     val recommended: String? = null,
     val eligible: List<String> = emptyList(),
     val notEligible: List<NotEligible> = emptyList(),
-    val insurance: JsonObject = JsonObject(emptyMap()),
+    /** Keyed by line (travel, life); only sent when Premium is recommended. */
+    val insurance: Map<String, InsuranceLine> = emptyMap(),
     val reasons: List<String> = emptyList(),
     val assumptions: List<String> = emptyList(),
+)
+
+@Serializable
+data class InsuranceLine(
+    val available: Boolean = false,
+    val reason: String? = null,
 )
 
 @Serializable

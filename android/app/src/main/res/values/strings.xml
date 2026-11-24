@@ -64,6 +64,25 @@
     <string name="trust_not_shared">not shared</string>
     <string name="trust_skipped">skipped</string>
 
+    <!-- 6 Your package -->
+    <string name="package_title">Your package</string>
+    <string name="package_body">Based on your verified details, this is what we recommend. You can pick another package you\'re eligible for.</string>
+    <string name="package_recommended">Recommended for you</string>
+    <string name="package_why">Why</string>
+    <string name="package_not_eligible">Not available to you</string>
+    <string name="package_income_not_shared">You didn\'t share your income, so we recommend a package based on your age. You can still open an account.</string>
+    <string name="package_insurance">Insurance</string>
+    <string name="package_insurance_travel">Travel insurance</string>
+    <string name="package_insurance_life">Life insurance</string>
+    <string name="package_insurance_included">Included</string>
+    <string name="package_insurance_not_available">Not available at your age</string>
+    <string name="package_assumptions">How we decided</string>
+    <string name="package_continue">Continue with %1$s</string>
+    <string name="package_desc_simple">Current account and debit card for everyday banking. No monthly fee.</string>
+    <string name="package_desc_starter">For ages 18–25: free account, card and savings goals.</string>
+    <string name="package_desc_plus">Higher limits, a second card and cashback on purchases.</string>
+    <string name="package_desc_premium">Premium card, dedicated support and insurance.</string>
+
     <!-- Shared badges -->
     <string name="verified_badge">✓ Verified via EUDI Wallet</string>
     <string name="test_data_chip">TEST DATA</string>

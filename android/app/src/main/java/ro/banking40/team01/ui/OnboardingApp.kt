@@ -57,6 +57,15 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                         onContinue = viewModel::continueFromReview,
                     )
                 }
+                Screen.Package -> state.review?.let { review ->
+                    PackageScreen(
+                        decision = review.decision,
+                        incomeShared = review.incomeShared,
+                        selected = state.selectedPackage,
+                        onSelect = viewModel::selectPackage,
+                        onContinue = viewModel::continueFromPackage,
+                    )
+                }
                 is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::reset)
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,
