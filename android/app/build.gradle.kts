@@ -12,7 +12,7 @@ val localProps = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use(::load)
 }
-val backendBaseUrl = localProps.getProperty("backendBaseUrl") ?: "http://localhost:8081"
+val backendBaseUrl = localProps.getProperty("backendBaseUrl") ?: "https://okrzzubfh3hlh4wgjc5vbjc5ym0chayk.lambda-url.eu-central-1.on.aws"
 // Ask the wallet to hand back to the app (needs the team key) instead of the user switching back.
 val returnToApp = localProps.getProperty("returnToApp")?.toBoolean() ?: true
 // Use the backend's stub verifier for this build (the backend needs ALLOW_STUB=1).

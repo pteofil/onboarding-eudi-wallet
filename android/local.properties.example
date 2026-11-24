@@ -2,8 +2,9 @@
 # Android Studio writes sdk.dir for you.
 sdk.dir=/Users/<you>/Library/Android/sdk
 
-# Backend: local server through `adb reverse tcp:8081 tcp:8081`, or the Lambda Function URL.
-backendBaseUrl=http://localhost:8081
+# Backend: the hosted Lambda (default), or a local server through `adb reverse tcp:8081 tcp:8081`
+# with backendBaseUrl=http://localhost:8081
+backendBaseUrl=https://okrzzubfh3hlh4wgjc5vbjc5ym0chayk.lambda-url.eu-central-1.on.aws
 
 # true (default): the wallet hands back to the app after approval. false: the user switches back.
 returnToApp=true
