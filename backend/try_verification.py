@@ -1,6 +1,7 @@
 """Manual end-to-end check with a real wallet (two devices, QR on the laptop).
 
     python3 try_verification.py onboard-basic
+    python3 try_verification.py onboard-full --decide   # also print age, monthly amounts and the decision
 
 Starts a verification, opens the QR in the browser, polls, then collects, decrypts and checks
 the sealed result exactly like the Lambda does. Prints only the outcome and claim names.
@@ -23,7 +24,9 @@ for line in Path(__file__).with_name(".env").read_text().splitlines():
         key, value = line.split("=", 1)
         os.environ.setdefault(key, value)
 
-profile = sys.argv[1] if len(sys.argv) > 1 else os.environ["PROFILE_BASIC"]
+args = [a for a in sys.argv[1:] if not a.startswith("--")]
+decide = "--decide" in sys.argv
+profile = args[0] if args else os.environ["PROFILE_BASIC"]
 client = VerifierClient(os.environ["VERIFIER_BASE_URL"], os.environ["VERIFIER_WEBSITE_KEY"],
                         os.environ["VERIFIER_WEBSITE_SECRET"])
 started = client.start(profile)
@@ -61,3 +64,27 @@ def shape(value):
 
 for credential in payload.get("credentials", []):
     print(f"  {credential.get('type')}: {json.dumps(shape(credential.get('claims') or {}))}")
+
+
+if decide:
+    from datetime import date
+
+    from linker import link_income
+    from rules import age_on, recommend
+    from service import mask, split_credentials
+
+    pid, _, income = split_credentials(payload.get("credentials", []))
+    print(f"\nage today: {age_on(pid['birth_date'], date.today())}  CNP: {mask(pid.get('personal_numeric_code'))}")
+    linked, note = None, "income not shared"
+    if income:
+        monthly = income["monthly_income"]
+        amounts = [f"{p['month']}: {p['net_amount_minor'] / 100:,.2f}" for p in monthly["periods"]]
+        print(f"income ({monthly.get('income_type')}, {monthly.get('currency')}): " + " | ".join(amounts))
+        print(f"lowest month: {min(p['net_amount_minor'] for p in monthly['periods']) / 100:,.2f}"
+              f"  income CNP: {mask(income.get('subject', {}).get('personal_numeric_code'))}")
+        linked, note = link_income(pid, income, time.time())
+    print("linker:", note)
+    decision = recommend(pid, linked, date.today())
+    print("decision:", decision["recommended"] or decision["status"], "| eligible:", decision["eligible"])
+    for name, item in decision.get("insurance", {}).items():
+        print(f"  {name} insurance: {item['reason']}")
