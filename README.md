@@ -22,7 +22,7 @@ adb reverse tcp:8081 tcp:8081   # phone -> laptop
 API (JSON):
 | Call | Returns |
 |---|---|
-| `POST /applications {shareIncome, returnToApp?}` | `{applicationId, deepLink, status}`; open `deepLink` with ACTION_VIEW. Leave `returnToApp` off unless the app handles the callback (see below) |
+| `POST /applications {shareIncome, returnToApp?}` | `{applicationId, deepLink, status}`; open `deepLink` with ACTION_VIEW. The app sends `returnToApp: true` (see below) |
 | `POST /applications/{id}/claim {responseCode}` | status; only with `returnToApp: true`, when the wallet returns to `ro.banking40.team01://same-device` |
 | `GET /applications/{id}/status` | `PENDING` (+`walletStatus`, e.g. `REQUEST_RETRIEVED`, `WAITING_FOR_APP_RETURN`), `VERIFIED`, `DECLINED`, `EXPIRED`, `WALLET_ERROR`, `NOT_VERIFIED`, `UNDER_18`, `MISSING_IDENTITY`, `CONFIRMED` |
 | `GET /applications/{id}/review` | verified identity, masked CNP, address, `incomeShared`, package `decision` |
@@ -30,7 +30,7 @@ API (JSON):
 
 Stub on request: with `ALLOW_STUB=1` on a real backend, `POST /applications {"stub": true}` returns fixed test data straight away, without a wallet. Its review carries `stub: true`, and it's for UI work only. `STUB_VERIFIER=1` makes every request a stub, for local work without Tremend credentials.
 
-Same-device return. Without `returnToApp` the customer approves in the wallet, taps Close and switches back to the app, which keeps polling `status`. This is tested with the real wallet. With `returnToApp: true` the verifier withholds status and result until the app posts the wallet's `response_code`. The wallet only returns to an app with our application ID that is signed with `team-debug.p12`; until that works, the application stays at `WAITING_FOR_APP_RETURN`.
+Same-device return. Without `returnToApp` the customer approves in the wallet, taps Close and switches back to the app, which keeps polling `status`. This is tested with the real wallet. With `returnToApp: true` the verifier withholds status and result until the app posts the wallet's `response_code`. The wallet only returns to an app with our application ID, signed with `team-debug.p12`, that has an activity named `eu.europa.ec.euidi.verifier.presentation.ui.SameDeviceCallbackActivity` (the verifier SDK's class). Our app ships a same-named activity that forwards the URI to `MainActivity`; tested with the real wallet. Without the claim the application stays at `WAITING_FOR_APP_RETURN`.
 
 Package rules (`rules.py`), set with env vars: `STARTER_MAX_AGE` (25), `PLUS_MIN_MONTHLY_RON` (5000), `PREMIUM_MIN_MONTHLY_RON` (10000), `TRAVEL_INSURANCE_MAX_AGE` (70), `LIFE_INSURANCE_MAX_AGE` (80). Income is the lowest of the six monthly net amounts. To check a scenario with the real wallet: `python3 try_verification.py onboard-full --decide`.
 
