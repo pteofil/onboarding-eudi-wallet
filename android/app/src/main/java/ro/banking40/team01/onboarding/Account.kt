@@ -7,7 +7,7 @@ data class Account(
     val packageName: String,
     val iban: String,
     val reference: String,
-    /** From "Continue with EUDI Wallet" to the account being opened. */
+    /** From "Onboard with EUDI Wallet" to the account being opened. */
     val onboardingSeconds: Long?,
 )
 
