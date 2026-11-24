@@ -145,7 +145,7 @@ fun packageLabel(name: String): String = when (name) {
 }
 
 @Composable
-private fun packageDescription(name: String): String? = when (name) {
+fun packageDescription(name: String): String? = when (name) {
     "Simple" -> stringResource(R.string.pkg_simple_desc)
     "Starter" -> stringResource(R.string.pkg_starter_desc)
     "Plus" -> stringResource(R.string.pkg_plus_desc)

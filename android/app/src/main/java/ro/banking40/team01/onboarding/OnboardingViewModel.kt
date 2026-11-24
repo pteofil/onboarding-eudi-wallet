@@ -35,6 +35,7 @@ import kotlin.time.Duration.Companion.minutes
 /** Numbers match the journey's screen list; 2, 5, 6 and 7 come after lunch. */
 sealed interface Screen {
     data object Landing : Screen // animated intro
+    data object Dashboard : Screen // after onboarding
     data object Start : Screen // 1 Become a client
     data object FormDetails : Screen // manual form 1/2 (demo only)
     data object FormAddress : Screen // manual form 2/2 (demo only)
@@ -56,6 +57,7 @@ data class UiState(
     val screen: Screen = Screen.Start,
     val notice: Notice? = null,
     val form: ManualForm = ManualForm(),
+    val account: Account? = null,
     /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
     val shareIncome: Boolean = false,
     /** GET /review, loaded once the backend says VERIFIED. */
@@ -96,9 +98,20 @@ class OnboardingViewModel(
 
     private var job: Job? = null
 
+    /** For the dashboard's "opened in 1 min 42 s"; in memory only. */
+    private var journeyStartedAt: Long? = null
+
     fun getStarted() = show(Screen.Start)
 
-    fun openConsent() = show(Screen.Consent)
+    fun openConsent() {
+        journeyStartedAt = System.currentTimeMillis()
+        show(Screen.Consent)
+    }
+
+    /** Welcome -> dashboard; without account details (e.g. after a restart) back to the start. */
+    fun openDashboard() = if (_state.value.account != null) show(Screen.Dashboard) else reset()
+
+    fun logout() = reset()
 
     fun openForm() = show(Screen.FormDetails)
 
@@ -301,7 +314,19 @@ class OnboardingViewModel(
         try {
             val confirmation = api.confirm(id, ConfirmRequest(packageName))
             // The verified details are no longer needed once the account is opened.
-            _state.update { UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome) }
+            val seconds = journeyStartedAt?.let { (System.currentTimeMillis() - it) / 1000 }
+            _state.update {
+                val identity = it.review?.identity
+                val account = Account(
+                    firstName = identity?.givenName?.let(::displayName),
+                    fullName = listOfNotNull(identity?.givenName, identity?.familyName).joinToString(" ").ifBlank { null },
+                    packageName = confirmation.packageName,
+                    iban = confirmation.iban,
+                    reference = confirmation.reference,
+                    onboardingSeconds = seconds,
+                )
+                UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome, account = account)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

@@ -113,6 +113,28 @@
     <string name="welcome_reference">Reference</string>
     <string name="welcome_already_confirmed">This application has already been confirmed.</string>
     <string name="welcome_done">Done</string>
+    <string name="welcome_open_account">Go to my account</string>
+
+    <!-- Dashboard (after onboarding) -->
+    <string name="dashboard_logout">Log out</string>
+    <string name="dashboard_greeting">Hello, %1$s</string>
+    <string name="dashboard_greeting_plain">Hello</string>
+    <string name="dashboard_balance_label">Available balance</string>
+    <string name="dashboard_balance">0.00 RON</string>
+    <string name="dashboard_opened_in">Account opened in %1$s with your EUDI Wallet</string>
+    <string name="duration_seconds">%1$d s</string>
+    <string name="duration_minutes_seconds">%1$d min %2$d s</string>
+    <string name="dashboard_card_virtual">VIRTUAL CARD</string>
+    <string name="dashboard_action_send">Send</string>
+    <string name="dashboard_action_add_money">Add money</string>
+    <string name="dashboard_action_card">Card</string>
+    <string name="dashboard_action_savings">Savings</string>
+    <string name="dashboard_your_package">Your %1$s package</string>
+    <string name="dashboard_reference">Reference %1$s</string>
+    <string name="dashboard_activity">Recent activity</string>
+    <string name="dashboard_activity_opened">Account opened</string>
+    <string name="dashboard_activity_opened_detail">Today · verified with your EUDI Wallet</string>
+    <string name="dashboard_activity_empty">Your transactions will appear here.</string>
 
     <!-- App-side errors (not backend statuses) -->
     <string name="err_no_wallet_title">EUDI Wallet not found</string>

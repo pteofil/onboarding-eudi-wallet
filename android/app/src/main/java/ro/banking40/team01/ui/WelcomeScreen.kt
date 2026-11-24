@@ -34,7 +34,7 @@ fun WelcomeScreen(confirmation: ConfirmResponse?, onDone: () -> Unit) {
             }
         }
         Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.welcome_done))
+            Text(stringResource(if (confirmation != null) R.string.welcome_open_account else R.string.welcome_done))
         }
     }
 }

@@ -39,13 +39,14 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
         }
     }
     // Full-bleed screens draw their own gradient behind the status bar, with light icons on it.
-    val fullBleed = state.screen == Screen.Landing
+    val fullBleed = state.screen == Screen.Landing || state.screen == Screen.Dashboard
     val view = LocalView.current
     val window = LocalActivity.current?.window
     LaunchedEffect(fullBleed) {
         window?.let { WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !fullBleed }
     }
-    BackHandler(enabled = state.screen != Screen.Start && state.screen != Screen.Landing) { viewModel.back() }
+    val backLeavesApp = state.screen == Screen.Start || state.screen == Screen.Landing || state.screen == Screen.Dashboard
+    BackHandler(enabled = !backLeavesApp) { viewModel.back() }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Box(Modifier.fillMaxSize().padding(if (fullBleed) PaddingValues() else padding)) {
@@ -97,7 +98,14 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                         onSign = viewModel::sign,
                     )
                 }
-                is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::reset)
+                is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::openDashboard)
+                Screen.Dashboard -> state.account?.let { account ->
+                    DashboardScreen(
+                        account = account,
+                        onLogout = viewModel::logout,
+                        onNotInDemo = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
+                    )
+                }
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,
                     onTryAgain = viewModel::tryAgain,
