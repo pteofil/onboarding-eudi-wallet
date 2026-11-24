@@ -1,7 +1,7 @@
-# VerifiedStart
+# Verified Onboarding: Flash team
 
-Bank onboarding with the EUDI Wallet: the customer shares verified identity, address and (optionally)
-income from the wallet; nothing is typed. Banking 4.0 EUDI Wallet hackathon, Team 01.
+Bank onboarding with the EUDI Wallet for Flash Bank, a fictional bank: the customer shares verified identity, address
+and (optionally) income from the wallet; nothing is typed. Banking 4.0 EUDI Wallet hackathon, Team 01 (Flash team).
 
 ## Stack
 - `android/` - Kotlin + Jetpack Compose app (`ro.banking40.team01`)
