@@ -34,6 +34,7 @@ import kotlin.time.Duration.Companion.minutes
 
 /** Numbers match the journey's screen list; 2, 5, 6 and 7 come after lunch. */
 sealed interface Screen {
+    data object Landing : Screen // animated intro
     data object Start : Screen // 1 Become a client
     data object Consent : Screen // 2 Consent
     data object Handoff : Screen // 3 Wallet hand-off
@@ -80,7 +81,7 @@ class OnboardingViewModel(
         set(value) = saved.set(KEY_LAST_RESPONSE_CODE, value)
 
     private val _state = MutableStateFlow(
-        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Start, shareIncome = savedShareIncome),
+        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Landing, shareIncome = savedShareIncome),
     )
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -90,6 +91,8 @@ class OnboardingViewModel(
     val walletLinks: Flow<String> = _walletLinks.receiveAsFlow()
 
     private var job: Job? = null
+
+    fun getStarted() = show(Screen.Start)
 
     fun openConsent() = show(Screen.Consent)
 

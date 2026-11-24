@@ -1,6 +1,8 @@
 package ro.banking40.team01.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,7 +14,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ro.banking40.team01.R
 import ro.banking40.team01.onboarding.Notice
@@ -35,11 +39,19 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
             viewModel.dismissNotice()
         }
     }
-    BackHandler(enabled = state.screen != Screen.Start) { viewModel.back() }
+    // Full-bleed screens draw their own gradient behind the status bar, with light icons on it.
+    val fullBleed = state.screen == Screen.Landing
+    val view = LocalView.current
+    val window = LocalActivity.current?.window
+    LaunchedEffect(fullBleed) {
+        window?.let { WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !fullBleed }
+    }
+    BackHandler(enabled = state.screen != Screen.Start && state.screen != Screen.Landing) { viewModel.back() }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        Box(Modifier.fillMaxSize().padding(if (fullBleed) PaddingValues() else padding)) {
             when (val screen = state.screen) {
+                Screen.Landing -> LandingScreen(onGetStarted = viewModel::getStarted)
                 Screen.Start -> StartScreen(
                     onContinue = viewModel::openConsent,
                     onFillForm = { viewModel.showNotice(Notice.FORM) },
