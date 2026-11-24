@@ -53,9 +53,13 @@ def recommend(pid: dict, income: Optional[dict], today: date) -> dict:
         for name, minimum in tiers:
             if monthly >= minimum:
                 eligible.append(name)
-                reasons.append(f"Your verified income of {monthly:,.0f} RON/month → {name}")
             else:
                 not_eligible.append({"package": name, "reason": f"{name} needs at least {minimum:,} RON/month"})
+
+        if eligible[-1] in ("Plus", "Premium"):
+            reasons.append(f"Your verified income of {monthly:,.0f} RON/month → {eligible[-1]}")
+        else:
+            reasons.append(f"Your verified income of {monthly:,.0f} RON/month is below Plus")
 
     recommended = max(eligible, key=LADDER.index)
     insurance = {}
