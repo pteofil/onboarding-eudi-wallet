@@ -48,6 +48,7 @@ Java 17 bytecode (builds on Android Studio's bundled JDK), compileSdk 37, minSdk
    - `backendBaseUrl` - `http://localhost:8081` (with `adb reverse tcp:8081 tcp:8081`) or the Lambda Function URL
    - `teamDebug.storeFile` - absolute path to `team-debug.p12`, kept **outside** the repo
    - `teamDebug.storePassword`, `teamDebug.keyAlias`, `teamDebug.keyPassword` - from `android-sdk/README.md` in the team ZIP
+   - optional `returnToApp` (default `true`) and `stub` (default `false`, backend needs `ALLOW_STUB=1`)
 2. `cd android && ./gradlew :app:installDebug` (unit tests: `./gradlew :app:testDebugUnitTest`).
 
 Without `teamDebug.storeFile` the build falls back to the default debug key and the wallet will not return to the app.
@@ -55,7 +56,12 @@ Without `teamDebug.storeFile` the build falls back to the default debug key and 
 Wallet hand-off: `POST /applications` -> open `deepLink` -> the wallet returns to
 `ro.banking40.team01://same-device#response_code=...` -> `POST /claim` -> poll `/status` every 1.5 s.
 The app only shows what the backend decides; the wallet's return alone never counts as verified.
-Debug builds log the full return URI (tag `VerifiedStart`) because the exact format is not confirmed yet.
+Debug builds log the full return URI (tag `VerifiedStart`).
+
+The event wallet only returns to the verifier SDK's callback class inside the team package
+(`eu.europa.ec.euidi.verifier.presentation.ui.SameDeviceCallbackActivity`); it does nothing if that class is missing.
+We don't use the SDK, so the app ships a same-named activity that forwards the URI to `MainActivity`.
+With `returnToApp=false` the user taps Close in the wallet and switches back; the app polls on resume.
 
 ## Prepared before kickoff
 - Repository skeleton, `.gitignore`

@@ -140,7 +140,13 @@ class OnboardingViewModel(
         show(Screen.Handoff)
         job = viewModelScope.launch {
             try {
-                val created = api.create(CreateApplicationRequest(shareIncome))
+                val created = api.create(
+                    CreateApplicationRequest(
+                        shareIncome = shareIncome,
+                        returnToApp = BuildConfig.RETURN_TO_APP,
+                        stub = BuildConfig.USE_STUB_VERIFIER,
+                    ),
+                )
                 applicationId = created.applicationId
                 Log.i(TAG, "Application ${created.applicationId} created")
                 _walletLinks.send(created.deepLink)

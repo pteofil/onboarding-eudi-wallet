@@ -5,6 +5,11 @@ sdk.dir=/Users/<you>/Library/Android/sdk
 # Backend: local server through `adb reverse tcp:8081 tcp:8081`, or the Lambda Function URL.
 backendBaseUrl=http://localhost:8081
 
+# true (default): the wallet hands back to the app after approval. false: the user switches back.
+returnToApp=true
+# true: use the backend's stub verifier, no wallet needed (backend needs ALLOW_STUB=1). Default false.
+stub=false
+
 # team-debug.p12 from the team ZIP (android-sdk/). Keep it OUTSIDE the repo.
 # Values for the password and alias are in android-sdk/README.md of the team ZIP.
 teamDebug.storeFile=/absolute/path/outside/repo/team-debug.p12

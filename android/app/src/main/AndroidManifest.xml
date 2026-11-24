@@ -19,6 +19,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <!-- The wallet returns to this exact class name (the verifier SDK's); it forwards to MainActivity. -->
+        <activity
+            android:name="eu.europa.ec.euidi.verifier.presentation.ui.SameDeviceCallbackActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

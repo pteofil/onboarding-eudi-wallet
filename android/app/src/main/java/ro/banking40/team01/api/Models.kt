@@ -5,7 +5,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 @Serializable
-data class CreateApplicationRequest(val shareIncome: Boolean)
+// No defaults: the Json config doesn't encode default values, so every field is always sent.
+data class CreateApplicationRequest(
+    val shareIncome: Boolean,
+    val returnToApp: Boolean,
+    val stub: Boolean,
+)
 
 @Serializable
 data class CreateApplicationResponse(

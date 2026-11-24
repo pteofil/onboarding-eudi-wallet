@@ -13,6 +13,10 @@ val localProps = Properties().apply {
     if (file.exists()) file.inputStream().use(::load)
 }
 val backendBaseUrl = localProps.getProperty("backendBaseUrl") ?: "http://localhost:8081"
+// Ask the wallet to hand back to the app (needs the team key) instead of the user switching back.
+val returnToApp = localProps.getProperty("returnToApp")?.toBoolean() ?: true
+// Use the backend's stub verifier for this build (the backend needs ALLOW_STUB=1).
+val useStubVerifier = localProps.getProperty("stub")?.toBoolean() ?: false
 val teamKeyFile = localProps.getProperty("teamDebug.storeFile")?.let(::file)
 
 android {
@@ -27,6 +31,8 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         buildConfigField("String", "BACKEND_BASE_URL", "\"${backendBaseUrl.trimEnd('/')}/\"")
+        buildConfigField("boolean", "RETURN_TO_APP", returnToApp.toString())
+        buildConfigField("boolean", "USE_STUB_VERIFIER", useStubVerifier.toString())
     }
 
     signingConfigs {
