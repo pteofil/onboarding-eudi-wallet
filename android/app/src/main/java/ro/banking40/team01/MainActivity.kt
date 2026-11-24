@@ -54,9 +54,8 @@ class MainActivity : ComponentActivity() {
     private fun handleWalletReturn(intent: Intent?) {
         if (intent?.action != Intent.ACTION_VIEW) return
         val uri = intent.dataString ?: return
-        // Log the full URI first: the wallet's exact return format isn't confirmed yet.
-        // Debug builds only, because it carries a one-time code.
-        if (BuildConfig.DEBUG) Log.d(TAG, "Wallet returned: $uri")
+        // The format is confirmed (#response_code=...); the code itself is a one-time secret, so it is masked.
+        if (BuildConfig.DEBUG) Log.d(TAG, "Wallet returned: ${WalletReturn.redacted(uri)}")
         if (WalletReturn.isWalletReturn(uri)) viewModel.onWalletReturn(uri)
     }
 
