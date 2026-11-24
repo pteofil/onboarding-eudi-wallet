@@ -296,7 +296,7 @@ class OnboardingViewModel(
     private fun show(screen: Screen) = _state.update { it.copy(screen = screen) }
 
     private fun Exception.describe(): String =
-        (this as? HttpException)?.let { "HTTP ${it.code()} ${it.backendErrorCode()}" } ?: "${javaClass.simpleName}: $message"
+        (this as? HttpException)?.let { "HTTP ${it.code()} ${it.backendErrorCode()}" } ?: "${javaClass.simpleName}: ${message?.lineSequence()?.first()}"
 
     companion object {
         private const val TAG = "VerifiedStart"

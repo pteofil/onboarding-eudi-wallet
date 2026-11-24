@@ -19,6 +19,10 @@ fun addressLines(address: JsonObject): List<String> {
     return address.values.flatMap(::values)
 }
 
+/** Any JSON value as display text: lists are joined with commas. */
+fun jsonText(element: JsonElement?): String? =
+    element?.let(::values)?.takeIf { it.isNotEmpty() }?.joinToString(", ")
+
 private fun values(element: JsonElement): List<String> = when (element) {
     JsonNull -> emptyList()
     is JsonPrimitive -> listOf(element.content).filter { it.isNotBlank() }

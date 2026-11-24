@@ -60,7 +60,6 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                 Screen.Package -> state.review?.let { review ->
                     PackageScreen(
                         decision = review.decision,
-                        incomeShared = review.incomeShared,
                         selected = state.selectedPackage,
                         onSelect = viewModel::selectPackage,
                         onContinue = viewModel::continueFromPackage,

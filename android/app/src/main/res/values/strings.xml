@@ -45,6 +45,7 @@
     <string name="review_verified_section">Your details</string>
     <string name="review_name">Name</string>
     <string name="review_birth_date">Date of birth</string>
+    <string name="review_nationality">Nationality</string>
     <string name="review_cnp">Personal numeric code</string>
     <string name="review_address">Address</string>
     <string name="review_income">Income</string>
@@ -70,7 +71,6 @@
     <string name="package_recommended">Recommended for you</string>
     <string name="package_why">Why</string>
     <string name="package_not_eligible">Not available to you</string>
-    <string name="package_income_not_shared">You didn\'t share your income, so we recommend a package based on your age. You can still open an account.</string>
     <string name="package_insurance">Insurance</string>
     <string name="package_insurance_travel">Travel insurance</string>
     <string name="package_insurance_life">Life insurance</string>

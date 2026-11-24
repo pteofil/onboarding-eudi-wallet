@@ -27,6 +27,7 @@ import ro.banking40.team01.R
 import ro.banking40.team01.api.Decision
 import ro.banking40.team01.api.InsuranceLine
 import ro.banking40.team01.api.NotEligible
+import ro.banking40.team01.api.Reason
 import ro.banking40.team01.ui.theme.VerifiedStartTheme
 
 private val LADDER = listOf("Simple", "Starter", "Plus", "Premium")
@@ -35,7 +36,6 @@ private val LADDER = listOf("Simple", "Starter", "Plus", "Premium")
 @Composable
 fun PackageScreen(
     decision: Decision,
-    incomeShared: Boolean,
     selected: String?,
     onSelect: (String) -> Unit,
     onContinue: () -> Unit,
@@ -47,9 +47,6 @@ fun PackageScreen(
         .sortedBy { if (it == decision.recommended) 0 else if (it in decision.eligible) 1 else 2 }
 
     StepLayout(title = stringResource(R.string.package_title), body = stringResource(R.string.package_body)) {
-        if (!incomeShared) {
-            Text(stringResource(R.string.package_income_not_shared), style = MaterialTheme.typography.bodyMedium)
-        }
         names.forEach { name ->
             val eligible = name in decision.eligible
             PackageCard(
@@ -58,7 +55,7 @@ fun PackageScreen(
                 eligible = eligible,
                 selected = name == selected,
                 decision = decision,
-                notEligibleReason = notEligible[name]?.reason,
+                notEligibleReason = notEligible[name]?.let { reasonText(it.reason) },
                 onSelect = { if (eligible) onSelect(name) },
             )
         }
@@ -66,7 +63,7 @@ fun PackageScreen(
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.package_assumptions), style = MaterialTheme.typography.labelSmall)
                 decision.assumptions.forEach {
-                    Text("• $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                    Text("• ${reasonText(it, ASSUMPTION_PREFIX)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                 }
             }
         }
@@ -116,7 +113,7 @@ private fun PackageCard(
             }
             if (recommended && decision.reasons.isNotEmpty()) {
                 Text(stringResource(R.string.package_why), style = MaterialTheme.typography.labelMedium)
-                decision.reasons.forEach { Text("✓ $it", style = MaterialTheme.typography.bodySmall) }
+                decision.reasons.forEach { Text("✓ ${reasonText(it)}", style = MaterialTheme.typography.bodySmall) }
             }
             if (recommended && decision.insurance.isNotEmpty()) {
                 Text(stringResource(R.string.package_insurance), style = MaterialTheme.typography.labelMedium)
@@ -142,7 +139,7 @@ private fun InsuranceRow(key: String, line: InsuranceLine) {
             style = MaterialTheme.typography.bodyMedium,
             color = if (line.available) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.secondary,
         )
-        line.reason?.let {
+        reasonText(line.reason).takeIf { it.isNotBlank() }?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
         }
     }
@@ -165,15 +162,14 @@ private fun PackagePreview() = VerifiedStartTheme {
             status = "ELIGIBLE",
             recommended = "Premium",
             eligible = listOf("Simple", "Plus", "Premium"),
-            notEligible = listOf(NotEligible("Starter", "Starter is for ages 18–25")),
+            notEligible = listOf(NotEligible("Starter", text = "Starter is for ages 18–25.")),
             insurance = mapOf(
-                "travel" to InsuranceLine(true, "Travel insurance is included (available up to age 70)"),
-                "life" to InsuranceLine(false, "Life insurance is not available from age 80"),
+                "travel" to InsuranceLine(true, text = "Travel insurance is included (available up to age 70)."),
+                "life" to InsuranceLine(false, text = "Life insurance isn't available at your age (up to age 80)."),
             ),
-            reasons = listOf("You're 30, so you can open an account", "Your verified income of 12,000 RON/month → Premium"),
-            assumptions = listOf("Age is counted on 2026-05-14"),
+            reasons = listOf(Reason("AGE_ADULT", "You're 30, so you can open an account on your own.", age = 30)),
+            assumptions = listOf(Reason("FICTIONAL", "Prices and benefits belong to a fictional bank.")),
         ),
-        incomeShared = true,
         selected = "Plus",
         onSelect = {},
         onContinue = {},
