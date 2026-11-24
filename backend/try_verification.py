@@ -48,5 +48,16 @@ payload = open_result(client.collect(tx), load_private_key(base64.b64decode(os.e
                       client.jwks(), os.environ["VERIFIER_BASE_URL"], os.environ["VERIFIER_AUDIENCE"], tx)
 client.acknowledge(tx)
 print("trust checks passed; outcome:", json.dumps(payload.get("outcome")))
+
+
+def shape(value):
+    """Field names and types only, never values."""
+    if isinstance(value, dict):
+        return {key: shape(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [shape(value[0]), f"x{len(value)}"] if value else []
+    return type(value).__name__
+
+
 for credential in payload.get("credentials", []):
-    print(f"  {credential.get('type')}: claims {sorted((credential.get('claims') or {}).keys())}")
+    print(f"  {credential.get('type')}: {json.dumps(shape(credential.get('claims') or {}))}")
