@@ -40,12 +40,29 @@ It skips all trust checks and must never be used in the demo.
 
 Secrets live only in `backend/.env` (local) and Lambda environment variables (cloud). The app never holds them.
 
+## Android
+Kotlin + Compose, one Activity, ViewModel + StateFlow, Retrofit/OkHttp + kotlinx.serialization.
+JDK 17, compileSdk 37, minSdk 29, Gradle 9.8.2, AGP 9.5.1, Kotlin 2.4.21.
+
+1. Copy `android/local.properties.example` to `android/local.properties` (git-ignored) and fill in:
+   - `backendBaseUrl` - `http://localhost:8081` (with `adb reverse tcp:8081 tcp:8081`) or the Lambda Function URL
+   - `teamDebug.storeFile` - absolute path to `team-debug.p12`, kept **outside** the repo
+   - `teamDebug.storePassword`, `teamDebug.keyAlias`, `teamDebug.keyPassword` - from `android-sdk/README.md` in the team ZIP
+2. `cd android && ./gradlew :app:installDebug` (unit tests: `./gradlew :app:testDebugUnitTest`).
+
+Without `teamDebug.storeFile` the build falls back to the default debug key and the wallet will not return to the app.
+
+Wallet hand-off: `POST /applications` -> open `deepLink` -> the wallet returns to
+`ro.banking40.team01://same-device#response_code=...` -> `POST /claim` -> poll `/status` every 1.5 s.
+The app only shows what the backend decides; the wallet's return alone never counts as verified.
+Debug builds log the full return URI (tag `VerifiedStart`) because the exact format is not confirmed yet.
+
 ## Prepared before kickoff
 - Repository skeleton, `.gitignore`
 - `backend/verifier_client.py` - HMAC-signed Website API client (checked against the Starter Pack sample)
 - `backend/validator.py` + tests - sealed result decryption and validation (Starter Pack page 11)
 
-Built during the event: `service.py`, `handler.py`, `store.py`, `local_server.py`, `stub_verifier.py`, `deploy.py`.
+Built during the event: `service.py`, `handler.py`, `store.py`, `local_server.py`, `stub_verifier.py`, `deploy.py`, `android/`.
 
 ## Mocked / simplified
 - Package thresholds and benefits are illustrative
