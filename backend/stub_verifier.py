@@ -8,14 +8,17 @@ from __future__ import annotations
 import json
 import uuid
 
+# Same shapes as the real sandbox credentials (PID_RO_SANDBOX, ADDRESS, INCOME_ATTESTATION).
 STUB_PID = {
-    "given_name": "ANA", "family_name": "POPESCU", "birth_date": "1996-03-14",
+    "given_name": "ANA", "family_name": "POPESCU", "birthdate": "1996-03-14",
+    "age_equal_or_over": {"18": True}, "place_of_birth": {"country": "RO", "locality": "Bucuresti"},
     "personal_numeric_code": "2960314123456",
 }
-STUB_ADDRESS = {"street": "Str. Exemplu 1", "locality": "Bucuresti", "postal_code": "010101", "country": "RO"}
+STUB_ADDRESS = {"address": {"formatted": "Str. Exemplu 1, 010101 Bucuresti, Romania"}}
 STUB_INCOME = {
     "subject": {"personal_numeric_code": STUB_PID["personal_numeric_code"]},
-    "monthly_income": {"periods": [{"month": f"2026-0{m}", "net_amount_minor": 1_200_000} for m in range(4, 10)]},
+    "monthly_income": {"income_type": "SALARY", "currency": "RON",
+                       "periods": [{"month": f"2026-0{m}", "net_amount_minor": 1_200_000} for m in range(4, 10)]},
 }
 
 
@@ -23,7 +26,7 @@ class StubVerifier:
     """Stateless (Lambda instances don't share memory): the profile is encoded in the transaction id."""
 
     def start(self, profile: str, return_uri: str | None = None) -> dict:
-        tx = f"stub-{'full' if profile.endswith('FULL') else 'basic'}-{uuid.uuid4()}"
+        tx = f"stub-{'full' if profile.lower().endswith('full') else 'basic'}-{uuid.uuid4()}"
         return {"transactionId": tx, "deepLink": f"{return_uri}#response_code=stub-code"}
 
     def claim(self, transaction_id: str, response_code: str) -> dict:
@@ -33,9 +36,9 @@ class StubVerifier:
         return {"status": "COMPLETED"}
 
     def collect(self, transaction_id: str) -> str:
-        credentials = [{"type": "PID_RO", "claims": STUB_PID}, {"type": "ADDRESS_RO", "claims": STUB_ADDRESS}]
+        credentials = [{"type": "PID_RO_SANDBOX", "claims": STUB_PID}, {"type": "ADDRESS", "claims": STUB_ADDRESS}]
         if transaction_id.startswith("stub-full-"):
-            credentials.append({"type": "INCOME_RO", "claims": STUB_INCOME})
+            credentials.append({"type": "INCOME_ATTESTATION", "claims": STUB_INCOME})
         return json.dumps({
             "jti": f"stub-{uuid.uuid4()}", "transactionId": transaction_id,
             "outcome": {"status": "SATISFIED", "withheld": []}, "credentials": credentials,

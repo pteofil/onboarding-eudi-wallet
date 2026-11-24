@@ -156,7 +156,8 @@ def test_stub_flow_through_lambda_handler(monkeypatch):
     import handler
 
     monkeypatch.setattr(handler, "_service", build_service(
-        {"STUB_VERIFIER": "1", "VERIFIER_RETURN_URI": "ro.banking40.team01://same-device"}))
+        {"STUB_VERIFIER": "1", "VERIFIER_RETURN_URI": "ro.banking40.team01://same-device",
+         "PROFILE_BASIC": "onboard-basic", "PROFILE_FULL": "onboard-full"}))
 
     def call(method, path, body=None):
         response = lambda_handler({"rawPath": path, "body": json.dumps(body) if body else None,
