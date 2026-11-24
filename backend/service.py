@@ -161,7 +161,7 @@ class OnboardingService:
             [c.get("type") for c in payload.get("credentials", [])], income is not None,
             linked_income is not None, (income_note or {}).get("text"), self.clock(), stub=app["transactionId"].startswith("stub-"))
         app["display"] = {
-            "identity": {k: pid.get(k) for k in ("given_name", "family_name", "birth_date")},
+            "identity": {k: pid.get(k) for k in ("given_name", "family_name", "birth_date", "nationality")},
             "personalNumericCode": mask(pid.get("personal_numeric_code")),
             "address": address,
             "incomeShared": linked_income is not None,

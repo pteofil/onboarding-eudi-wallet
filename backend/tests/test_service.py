@@ -12,7 +12,7 @@ from validator import open_result
 from verifier_client import VerifierError
 
 PID = {"given_name": "ANA", "family_name": "POPESCU", "birth_date": "1996-03-14",
-       "personal_numeric_code": "2960314123456"}
+       "personal_numeric_code": "2960314123456", "nationality": ["RO"]}
 ADDRESS = {"locality": "Bucuresti"}
 
 
@@ -77,6 +77,7 @@ def test_verified_result_reaches_review_and_is_acknowledged(keys):
     assert svc.status(app_id)["status"] == "VERIFIED"
     review = svc.review(app_id)
     assert review["identity"]["family_name"] == "POPESCU"
+    assert review["identity"]["nationality"] == ["RO"]
     assert review["personalNumericCode"] == "2********3456"
     assert review["decision"]["recommended"] == "Simple"
     assert verifier.acknowledged == ["tx-1"]

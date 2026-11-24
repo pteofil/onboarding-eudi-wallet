@@ -25,7 +25,7 @@ API (JSON):
 | `POST /applications {shareIncome, returnToApp?}` | `{applicationId, deepLink, status}`; open `deepLink` with ACTION_VIEW. The app sends `returnToApp: true` (see below) |
 | `POST /applications/{id}/claim {responseCode}` | status; only with `returnToApp: true`, when the wallet returns to `ro.banking40.team01://same-device` |
 | `GET /applications/{id}/status` | `PENDING` (+`walletStatus`, e.g. `REQUEST_RETRIEVED`, `WAITING_FOR_APP_RETURN`), `VERIFIED`, `DECLINED`, `EXPIRED`, `WALLET_ERROR`, `NOT_VERIFIED`, `UNDER_18`, `MISSING_IDENTITY`, `CONFIRMED` |
-| `GET /applications/{id}/review` | verified identity, masked CNP, address, `incomeShared`, package `decision`, `trust` (see below) |
+| `GET /applications/{id}/review` | verified identity (name, birth date, `nationality` when the profile asks for it), masked CNP, address, `incomeShared`, package `decision`, `trust` (see below) |
 | `POST /applications/{id}/confirm {package?}` | `{package, iban, reference}` (simulated) |
 
 Stub on request: with `ALLOW_STUB=1` on a real backend, `POST /applications {"stub": true}` returns fixed test data straight away, without a wallet. Its review carries `stub: true`, and it's for UI work only. `STUB_VERIFIER=1` makes every request a stub, for local work without Tremend credentials.
