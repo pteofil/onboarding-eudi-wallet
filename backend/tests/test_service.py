@@ -122,6 +122,14 @@ def test_missing_address_is_reported(keys):
     assert svc.status(svc.create(False)["applicationId"])["status"] == "MISSING_IDENTITY"
 
 
+def test_sandbox_pid_birthdate_attribute_is_used(keys):
+    sandbox_pid = {k: v for k, v in PID.items() if k != "birth_date"} | {"birthdate": "2010-01-01"}
+    credentials = [{"type": "PID_RO_SANDBOX", "claims": sandbox_pid},
+                   {"type": "ADDRESS", "claims": {"address": {"formatted": "Str. X 1, Bucuresti"}}}]
+    svc = service(keys, FakeVerifier([sealed(keys, credentials=credentials)]))
+    assert svc.status(svc.create(False)["applicationId"])["status"] == "UNDER_18"
+
+
 def test_income_of_someone_else_is_ignored(keys):
     income = {"subject": {"personal_numeric_code": "1800101000000"}, "monthly_income": {"periods": []}}
     credentials = [{"type": "PID_RO", "claims": PID}, {"type": "ADDRESS", "claims": ADDRESS},
