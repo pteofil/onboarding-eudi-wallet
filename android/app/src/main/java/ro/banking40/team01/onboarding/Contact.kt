@@ -1,5 +1,8 @@
 package ro.banking40.team01.onboarding
 
+import ro.banking40.team01.api.Identity
+import java.text.Normalizer
+
 /** The only details the customer types. The OTP is simulated: no SMS is sent, any 6 digits pass. */
 data class Contact(
     val phone: String = "",
@@ -18,5 +21,17 @@ data class Contact(
 
     companion object {
         const val OTP_LENGTH = 6
+
+        /** Demo code, filled in as if the phone read it from the SMS. */
+        const val DEMO_OTP = "123456"
+
+        /** Prefilled for the demo: a fictional phone and an email built from the verified name. */
+        fun demoFor(identity: Identity): Contact {
+            val local = listOfNotNull(identity.givenName, identity.familyName)
+                .joinToString(".") { Normalizer.normalize(it, Normalizer.Form.NFD).lowercase() }
+                .replace(Regex("[^a-z0-9.]"), "")
+                .ifBlank { "client" }
+            return Contact(phone = "+40 712 345 678", email = "$local@example.com")
+        }
     }
 }

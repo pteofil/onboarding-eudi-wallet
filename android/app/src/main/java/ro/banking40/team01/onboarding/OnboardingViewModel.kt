@@ -140,7 +140,7 @@ class OnboardingViewModel(
 
     fun onEmailChange(email: String) = updateContact { it.copy(email = email.trim()) }
 
-    fun sendOtp() = updateContact { it.copy(otpSent = true, otp = "") }
+    fun sendOtp() = updateContact { it.copy(otpSent = true, otp = Contact.DEMO_OTP) }
 
     fun onOtpChange(otp: String) =
         updateContact { it.copy(otp = otp.filter(Char::isDigit).take(Contact.OTP_LENGTH)) }
@@ -283,7 +283,12 @@ class OnboardingViewModel(
         try {
             val review = api.review(id)
             _state.update {
-                it.copy(review = review, selectedPackage = review.decision.recommended, screen = Screen.Review)
+                it.copy(
+                    review = review,
+                    contact = Contact.demoFor(review.identity),
+                    selectedPackage = review.decision.recommended,
+                    screen = Screen.Review,
+                )
             }
         } catch (e: CancellationException) {
             throw e

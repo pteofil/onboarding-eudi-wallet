@@ -67,11 +67,12 @@
     <string name="review_income_shared">Shared and verified</string>
     <string name="review_income_not_shared">Not shared</string>
     <string name="review_contact_section">How can we reach you?</string>
+    <string name="review_contact_demo">Demo: prefilled for you. Tap Send confirmation code to finish.</string>
     <string name="review_phone">Mobile phone</string>
     <string name="review_email">Email</string>
     <string name="review_send_code">Send confirmation code</string>
     <string name="review_code">Confirmation code</string>
-    <string name="review_code_hint">Demo: no SMS is sent. Enter any 6 digits.</string>
+    <string name="review_code_hint">Demo: no SMS is sent; the code is filled in for you.</string>
     <string name="review_code_confirmed">✓ Phone number confirmed</string>
     <string name="review_continue">Continue</string>
     <string name="trust_show">What we checked (%1$d)</string>
