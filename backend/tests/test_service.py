@@ -80,6 +80,11 @@ def test_verified_result_reaches_review_and_is_acknowledged(keys):
     assert review["personalNumericCode"] == "2********3456"
     assert review["decision"]["recommended"] == "Simple"
     assert verifier.acknowledged == ["tx-1"]
+    results = {check["id"]: check["result"] for check in review["trust"]["checks"]}
+    assert results.pop("income_linked") == "not_shared"
+    assert set(results.values()) == {"passed"}
+    assert review["trust"]["credentials"] == ["PID_RO", "ADDRESS"]
+    assert "POPESCU" not in json.dumps(review["trust"]) and PID["personal_numeric_code"] not in json.dumps(review["trust"])
 
 
 def test_replayed_result_is_rejected(keys):
@@ -149,7 +154,10 @@ def test_income_of_someone_else_is_ignored(keys):
     app_id = svc.create(True)["applicationId"]
 
     assert svc.status(app_id)["status"] == "VERIFIED"
-    assert svc.review(app_id)["incomeShared"] is False
+    review = svc.review(app_id)
+    assert review["incomeShared"] is False
+    income_check = review["trust"]["checks"][-1]
+    assert income_check["result"] == "failed" and "someone else" in income_check["detail"]
 
 
 def test_confirm_only_eligible_package(keys):
@@ -209,3 +217,5 @@ def test_stub_on_request_alongside_real_verifier(monkeypatch):
     assert call(None, f"/applications/{app_id}/status", "GET")[1]["status"] == "VERIFIED"
     review = call(None, f"/applications/{app_id}/review", "GET")[1]
     assert review["stub"] is True and review["incomeShared"] is True
+    assert review["trust"]["note"] == "Test data: no checks were run"
+    assert {c["result"] for c in review["trust"]["checks"] if c["id"] != "income_linked"} == {"skipped"}

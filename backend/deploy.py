@@ -12,7 +12,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 BUILD = HERE.parent / "build" / "lambda"
 ZIP = HERE.parent / "build" / "verifiedstart-lambda"
-SOURCES = ["handler.py", "service.py", "store.py", "stub_verifier.py", "validator.py", "verifier_client.py"]
+SOURCES = ["handler.py", "service.py", "store.py", "stub_verifier.py", "trust.py", "validator.py", "verifier_client.py"]
 
 
 def build() -> Path:

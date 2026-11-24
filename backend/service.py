@@ -11,6 +11,7 @@ import uuid
 from datetime import date
 from typing import Callable, Optional
 
+import trust
 from validator import ResultRejected
 from verifier_client import VerifierError
 
@@ -76,7 +77,7 @@ class OnboardingService:
         app = self._load(app_id)
         if app["state"] != "VERIFIED":
             raise BadRequest(f"application is {app['state']}")
-        return {"applicationId": app_id, **app["display"], "decision": app["decision"],
+        return {"applicationId": app_id, **app["display"], "decision": app["decision"], "trust": app.get("trust"),
                 **({"stub": True} if app["transactionId"].startswith("stub-") else {})}
 
     def confirm(self, app_id: str, package: Optional[str]) -> dict:
@@ -154,6 +155,9 @@ class OnboardingService:
         if income and not linked_income:
             decision.setdefault("reasons", []).append(income_note)
         app["decision"] = decision
+        app["trust"] = trust.build_report(
+            [c.get("type") for c in payload.get("credentials", [])], income is not None,
+            linked_income is not None, income_note, self.clock(), stub=app["transactionId"].startswith("stub-"))
         app["display"] = {
             "identity": {k: pid.get(k) for k in ("given_name", "family_name", "birth_date")},
             "personalNumericCode": mask(pid.get("personal_numeric_code")),
