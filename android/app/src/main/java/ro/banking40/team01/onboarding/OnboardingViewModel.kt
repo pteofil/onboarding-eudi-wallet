@@ -34,7 +34,12 @@ import kotlin.time.Duration.Companion.minutes
 
 /** Numbers match the journey's screen list; 2, 5, 6 and 7 come after lunch. */
 sealed interface Screen {
+    data object Landing : Screen // animated intro
+    data object Dashboard : Screen // after onboarding
     data object Start : Screen // 1 Become a client
+    data object FormDetails : Screen // manual form 1/2 (demo only)
+    data object FormAddress : Screen // manual form 2/2 (demo only)
+    data object FormSubmitted : Screen
     data object Consent : Screen // 2 Consent
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
@@ -46,11 +51,13 @@ sealed interface Screen {
 }
 
 /** Short messages for actions the demo shows but doesn't implement. */
-enum class Notice { FORM, NOT_IN_DEMO }
+enum class Notice { NOT_IN_DEMO }
 
 data class UiState(
     val screen: Screen = Screen.Start,
     val notice: Notice? = null,
+    val form: ManualForm = ManualForm(),
+    val account: Account? = null,
     /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
     val shareIncome: Boolean = false,
     /** GET /review, loaded once the backend says VERIFIED. */
@@ -80,7 +87,7 @@ class OnboardingViewModel(
         set(value) = saved.set(KEY_LAST_RESPONSE_CODE, value)
 
     private val _state = MutableStateFlow(
-        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Start, shareIncome = savedShareIncome),
+        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Landing, shareIncome = savedShareIncome),
     )
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -91,7 +98,28 @@ class OnboardingViewModel(
 
     private var job: Job? = null
 
-    fun openConsent() = show(Screen.Consent)
+    /** For the dashboard's "opened in 1 min 42 s"; in memory only. */
+    private var journeyStartedAt: Long? = null
+
+    fun getStarted() = show(Screen.Start)
+
+    fun openConsent() {
+        journeyStartedAt = System.currentTimeMillis()
+        show(Screen.Consent)
+    }
+
+    /** Welcome -> dashboard; without account details (e.g. after a restart) back to the start. */
+    fun openDashboard() = if (_state.value.account != null) show(Screen.Dashboard) else reset()
+
+    fun logout() = reset()
+
+    fun openForm() = show(Screen.FormDetails)
+
+    fun updateForm(form: ManualForm) = _state.update { it.copy(form = form) }
+
+    fun formNext() = show(Screen.FormAddress)
+
+    fun submitForm() = show(Screen.FormSubmitted)
 
     fun setShareIncome(share: Boolean) = _state.update { it.copy(shareIncome = share) }
 
@@ -112,7 +140,8 @@ class OnboardingViewModel(
 
     /** System back: one step back where that makes sense, otherwise abandon the application. */
     fun back() = when (_state.value.screen) {
-        Screen.Consent -> show(Screen.Start)
+        Screen.Consent, Screen.FormDetails, Screen.FormSubmitted -> show(Screen.Start)
+        Screen.FormAddress -> show(Screen.FormDetails)
         Screen.Package -> show(Screen.Review)
         Screen.Confirm -> if (!_state.value.signing) show(Screen.Package) else Unit
         else -> reset()
@@ -124,7 +153,7 @@ class OnboardingViewModel(
 
     fun onEmailChange(email: String) = updateContact { it.copy(email = email.trim()) }
 
-    fun sendOtp() = updateContact { it.copy(otpSent = true, otp = "") }
+    fun sendOtp() = updateContact { it.copy(otpSent = true, otp = Contact.DEMO_OTP) }
 
     fun onOtpChange(otp: String) =
         updateContact { it.copy(otp = otp.filter(Char::isDigit).take(Contact.OTP_LENGTH)) }
@@ -267,7 +296,12 @@ class OnboardingViewModel(
         try {
             val review = api.review(id)
             _state.update {
-                it.copy(review = review, selectedPackage = review.decision.recommended, screen = Screen.Review)
+                it.copy(
+                    review = review,
+                    contact = Contact.demoFor(review.identity),
+                    selectedPackage = review.decision.recommended,
+                    screen = Screen.Review,
+                )
             }
         } catch (e: CancellationException) {
             throw e
@@ -280,7 +314,19 @@ class OnboardingViewModel(
         try {
             val confirmation = api.confirm(id, ConfirmRequest(packageName))
             // The verified details are no longer needed once the account is opened.
-            _state.update { UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome) }
+            val seconds = journeyStartedAt?.let { (System.currentTimeMillis() - it) / 1000 }
+            _state.update {
+                val identity = it.review?.identity
+                val account = Account(
+                    firstName = identity?.givenName?.let(::displayName),
+                    fullName = listOfNotNull(identity?.givenName, identity?.familyName).joinToString(" ").ifBlank { null },
+                    packageName = confirmation.packageName,
+                    iban = confirmation.iban,
+                    reference = confirmation.reference,
+                    onboardingSeconds = seconds,
+                )
+                UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome, account = account)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

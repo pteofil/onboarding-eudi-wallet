@@ -4,12 +4,45 @@
     <string name="app_name">Flash Bank</string>
     <string name="solution_name">Verified Onboarding</string>
 
+    <!-- Landing (animated intro) -->
+    <string name="landing_tagline">Open your account in minutes.\nShare verified details from your EUDI Wallet, nothing to type.</string>
+    <string name="landing_get_started">Get started</string>
+    <string name="landing_footer">Flash Bank is a fictional bank · Banking 4.0 EUDI Wallet hackathon · Flash team</string>
+
     <!-- 1 Become a client -->
     <string name="start_title">Become a client</string>
     <string name="start_body">Open your current account in minutes. Share your verified identity and address from your EUDI Wallet instead of typing them and uploading documents.</string>
-    <string name="start_continue_wallet">Continue with EUDI Wallet</string>
-    <string name="start_fill_form">Fill in the form</string>
-    <string name="form_not_available">The form is not available in this demo. Please continue with your EUDI Wallet.</string>
+    <string name="start_continue_wallet">Onboard with EUDI Wallet</string>
+    <string name="start_wallet_hint">Verified in minutes · nothing to type or upload</string>
+    <string name="start_fill_form">Manual onboarding</string>
+    <string name="start_manual_hint">Type your details and upload documents · checked in 2–3 working days</string>
+
+    <!-- Manual form (demo only, prefilled, nothing is sent) -->
+    <string name="form_step">Step %1$d of %2$d</string>
+    <string name="form_prefilled_note">Demo: we\'ve filled this in for you. Without a wallet, every field is typed by hand and checked by a colleague.</string>
+    <string name="form_details_title">Your details</string>
+    <string name="form_first_name">First name</string>
+    <string name="form_last_name">Last name</string>
+    <string name="form_birth_date">Date of birth (DD.MM.YYYY)</string>
+    <string name="form_cnp">Personal identification number (CNP)</string>
+    <string name="form_id_document">ID card series and number</string>
+    <string name="form_id_photo">Photo of your ID card</string>
+    <string name="form_id_photo_file">id_card_front.jpg · uploaded (demo)</string>
+    <string name="form_next">Next</string>
+    <string name="form_address_title">Address and income</string>
+    <string name="form_street">Street and number</string>
+    <string name="form_city">City</string>
+    <string name="form_postal_code">Postal code</string>
+    <string name="form_county">County</string>
+    <string name="form_employer">Employer</string>
+    <string name="form_income">Net monthly income (RON)</string>
+    <string name="form_payslips">Payslips for the last six months</string>
+    <string name="form_payslips_file">payslips_6_months.pdf · uploaded (demo)</string>
+    <string name="form_submit">Submit application</string>
+    <string name="form_submitted_title">Application received</string>
+    <string name="form_submitted_body">Because these details aren\'t verified, a colleague will check your documents by hand. This usually takes 2–3 working days, and we may ask you to visit a branch.</string>
+    <string name="form_submitted_wallet_pitch">With your EUDI Wallet your account is open in minutes: your details are already verified, so there\'s nothing to type or upload.</string>
+    <string name="form_back_to_start">Back to start</string>
 
     <!-- 2 Consent: the app's own strings; final copy is in the block from Dana below -->
     <string name="consent_continue">Open my EUDI Wallet</string>
@@ -36,11 +69,12 @@
     <string name="review_income_shared">Shared and verified</string>
     <string name="review_income_not_shared">Not shared</string>
     <string name="review_contact_section">How can we reach you?</string>
+    <string name="review_contact_demo">Demo: prefilled for you. Tap Send confirmation code to finish.</string>
     <string name="review_phone">Mobile phone</string>
     <string name="review_email">Email</string>
     <string name="review_send_code">Send confirmation code</string>
     <string name="review_code">Confirmation code</string>
-    <string name="review_code_hint">Demo: no SMS is sent. Enter any 6 digits.</string>
+    <string name="review_code_hint">Demo: no SMS is sent; the code is filled in for you.</string>
     <string name="review_code_confirmed">✓ Phone number confirmed</string>
     <string name="review_continue">Continue</string>
     <string name="trust_show">What we checked (%1$d)</string>
@@ -81,6 +115,28 @@
     <string name="welcome_reference">Reference</string>
     <string name="welcome_already_confirmed">This application has already been confirmed.</string>
     <string name="welcome_done">Done</string>
+    <string name="welcome_open_account">Go to my account</string>
+
+    <!-- Dashboard (after onboarding) -->
+    <string name="dashboard_logout">Log out</string>
+    <string name="dashboard_greeting">Hello, %1$s</string>
+    <string name="dashboard_greeting_plain">Hello</string>
+    <string name="dashboard_balance_label">Available balance</string>
+    <string name="dashboard_balance">987.00 RON</string>
+    <string name="dashboard_opened_in">Account opened in %1$s with your EUDI Wallet</string>
+    <string name="duration_seconds">%1$d s</string>
+    <string name="duration_minutes_seconds">%1$d min %2$d s</string>
+    <string name="dashboard_card_virtual">VIRTUAL CARD</string>
+    <string name="dashboard_action_send">Send</string>
+    <string name="dashboard_action_add_money">Add money</string>
+    <string name="dashboard_action_card">Card</string>
+    <string name="dashboard_action_savings">Savings</string>
+    <string name="dashboard_your_package">Your %1$s package</string>
+    <string name="dashboard_reference">Reference %1$s</string>
+    <string name="dashboard_activity">Recent activity</string>
+    <string name="dashboard_activity_opened">Account opened</string>
+    <string name="dashboard_activity_opened_detail">Today · verified with your EUDI Wallet</string>
+    <string name="dashboard_activity_empty">Your transactions will appear here.</string>
 
     <!-- App-side errors (not backend statuses) -->
     <string name="err_no_wallet_title">EUDI Wallet not found</string>

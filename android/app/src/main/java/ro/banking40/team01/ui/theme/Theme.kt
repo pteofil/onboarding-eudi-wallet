@@ -5,7 +5,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Fictional bank palette.
+// Fictional bank palette (no real bank's colours).
+val BrandTeal = Color(0xFF0B5D5B)
+val BrandNavy = Color(0xFF0A2540)
+val BrandMint = Color(0xFF5EEAD4)
+
 private val colors = lightColorScheme(
     primary = Color(0xFF0B5D5B),
     onPrimary = Color.White,

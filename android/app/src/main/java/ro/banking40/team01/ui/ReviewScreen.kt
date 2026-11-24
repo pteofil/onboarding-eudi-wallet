@@ -135,6 +135,11 @@ private fun ContactDetails(
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.review_contact_section), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.review_contact_demo),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+            )
             OutlinedTextField(
                 value = contact.phone,
                 onValueChange = onPhoneChange,

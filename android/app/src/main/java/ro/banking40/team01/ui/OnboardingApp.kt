@@ -1,6 +1,8 @@
 package ro.banking40.team01.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,7 +14,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ro.banking40.team01.R
 import ro.banking40.team01.onboarding.Notice
@@ -24,7 +28,6 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val noticeText = when (state.notice) {
-        Notice.FORM -> stringResource(R.string.form_not_available)
         Notice.NOT_IN_DEMO -> stringResource(R.string.not_in_demo)
         null -> null
     }
@@ -35,14 +38,29 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
             viewModel.dismissNotice()
         }
     }
-    BackHandler(enabled = state.screen != Screen.Start) { viewModel.back() }
+    // Full-bleed screens draw their own gradient behind the status bar, with light icons on it.
+    val fullBleed = state.screen == Screen.Landing || state.screen == Screen.Dashboard
+    val view = LocalView.current
+    val window = LocalActivity.current?.window
+    LaunchedEffect(fullBleed) {
+        window?.let { WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = !fullBleed }
+    }
+    val backLeavesApp = state.screen == Screen.Start || state.screen == Screen.Landing || state.screen == Screen.Dashboard
+    BackHandler(enabled = !backLeavesApp) { viewModel.back() }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        Box(Modifier.fillMaxSize().padding(if (fullBleed) PaddingValues() else padding)) {
             when (val screen = state.screen) {
+                Screen.Landing -> LandingScreen(onGetStarted = viewModel::getStarted)
                 Screen.Start -> StartScreen(
                     onContinue = viewModel::openConsent,
-                    onFillForm = { viewModel.showNotice(Notice.FORM) },
+                    onFillForm = viewModel::openForm,
+                )
+                Screen.FormDetails -> FormDetailsScreen(state.form, viewModel::updateForm, viewModel::formNext)
+                Screen.FormAddress -> FormAddressScreen(state.form, viewModel::updateForm, viewModel::submitForm)
+                Screen.FormSubmitted -> FormSubmittedScreen(
+                    onUseWallet = viewModel::openConsent,
+                    onBackToStart = viewModel::reset,
                 )
                 Screen.Consent -> ConsentScreen(
                     shareIncome = state.shareIncome,
@@ -80,7 +98,14 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                         onSign = viewModel::sign,
                     )
                 }
-                is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::reset)
+                is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::openDashboard)
+                Screen.Dashboard -> state.account?.let { account ->
+                    DashboardScreen(
+                        account = account,
+                        onLogout = viewModel::logout,
+                        onNotInDemo = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
+                    )
+                }
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,
                     onTryAgain = viewModel::tryAgain,
