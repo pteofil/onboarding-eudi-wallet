@@ -41,8 +41,10 @@ fun PackageScreen(
     onContinue: () -> Unit,
 ) {
     val notEligible = decision.notEligible.associateBy { it.packageName }
+    // Recommended first, then the other eligible packages, then the ones not available; ladder order within each.
     val names = (LADDER + decision.eligible + notEligible.keys).distinct()
         .filter { it in decision.eligible || it in notEligible }
+        .sortedBy { if (it == decision.recommended) 0 else if (it in decision.eligible) 1 else 2 }
 
     StepLayout(title = stringResource(R.string.package_title), body = stringResource(R.string.package_body)) {
         if (!incomeShared) {

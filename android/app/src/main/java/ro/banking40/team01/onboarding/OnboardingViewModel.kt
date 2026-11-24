@@ -115,7 +115,9 @@ class OnboardingViewModel(
         else -> reset()
     }
 
-    fun onPhoneChange(phone: String) = updateContact { it.copy(phone = phone) }
+    /** A new number needs a new code. */
+    fun onPhoneChange(phone: String) =
+        updateContact { if (phone == it.phone) it else it.copy(phone = phone, otpSent = false, otp = "") }
 
     fun onEmailChange(email: String) = updateContact { it.copy(email = email.trim()) }
 
