@@ -1,0 +1,23 @@
+# secrets and organiser files: never commit
+.env
+*.env
+*.pem
+*.key
+*.p12
+*.apk
+eu.zip
+android-sdk/
+TEAM-ACCESS.txt
+Android-wallet.zip
+starter-pack/
+
+# build
+__pycache__/
+.pytest_cache/
+.venv/
+.aws-sam/
+build/
+.gradle/
+local.properties
+.idea/
+.DS_Store
