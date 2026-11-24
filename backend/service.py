@@ -179,7 +179,7 @@ def split_credentials(credentials: list) -> tuple:
         elif "birthdate" in claims or "birth_date" in claims or "PID" in str(credential.get("type", "")).upper():
             pid = dict(claims)
         else:
-            address = claims
+            address = claims.get("address") if isinstance(claims.get("address"), dict) else claims
     if pid and "birth_date" not in pid and "birthdate" in pid:
         pid["birth_date"] = pid["birthdate"]  # sandbox PID uses `birthdate`; rules use `birth_date`
     return pid, address, income
