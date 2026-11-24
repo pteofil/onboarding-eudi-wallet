@@ -11,6 +11,25 @@
     <string name="start_fill_form">Fill in the form</string>
     <string name="form_not_available">The form is not available in this demo. Please continue with your EUDI Wallet.</string>
 
+    <!-- 2 Consent -->
+    <string name="consent_title">What we\'ll ask your wallet for</string>
+    <string name="consent_body">Your EUDI Wallet shows you this request again before anything is shared.</string>
+    <string name="consent_required">Required</string>
+    <string name="consent_optional">Optional</string>
+    <string name="consent_why">Why: %1$s</string>
+    <string name="consent_identity_title">Identity</string>
+    <string name="consent_identity_what">Name, date of birth and personal numeric code (CNP)</string>
+    <string name="consent_identity_why">the law requires us to know who our clients are, and your age decides which packages you can choose.</string>
+    <string name="consent_address_title">Address</string>
+    <string name="consent_address_what">Your registered address in Romania</string>
+    <string name="consent_address_why">we must record where you live, and we send your card there.</string>
+    <string name="consent_income_title">Income</string>
+    <string name="consent_income_what">Your net monthly income for the last 6 months</string>
+    <string name="consent_income_why">it can qualify you for a package with more benefits. Without it you can still open Simple or Starter.</string>
+    <string name="consent_income_switch">Share your income to unlock Plus or Premium</string>
+    <string name="consent_nothing_shared_yet">Nothing is shared until you approve it in your wallet.</string>
+    <string name="consent_continue">Open my EUDI Wallet</string>
+
     <!-- 3 Wallet hand-off -->
     <string name="handoff_title">Opening your EUDI Wallet…</string>
     <string name="handoff_body">Check who is asking and which details, then tap Share in your wallet. You will come back here automatically.</string>

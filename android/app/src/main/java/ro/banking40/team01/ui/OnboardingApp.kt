@@ -30,14 +30,19 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
             viewModel.dismissFormNotice()
         }
     }
-    BackHandler(enabled = state.screen != Screen.Start) { viewModel.reset() }
+    BackHandler(enabled = state.screen != Screen.Start) { viewModel.back() }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (val screen = state.screen) {
                 Screen.Start -> StartScreen(
-                    onContinue = { viewModel.continueWithWallet() },
+                    onContinue = viewModel::openConsent,
                     onFillForm = viewModel::showFormNotice,
+                )
+                Screen.Consent -> ConsentScreen(
+                    shareIncome = state.shareIncome,
+                    onShareIncomeChange = viewModel::setShareIncome,
+                    onContinue = viewModel::continueWithWallet,
                 )
                 Screen.Handoff -> HandoffScreen(onTryAgain = viewModel::tryAgain)
                 Screen.Verifying -> VerifyingScreen()

@@ -34,6 +34,7 @@ import kotlin.time.Duration.Companion.minutes
 /** Numbers match the journey's screen list; 2, 5, 6 and 7 come after lunch. */
 sealed interface Screen {
     data object Start : Screen // 1 Become a client
+    data object Consent : Screen // 2 Consent
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
     data class Welcome(val confirmation: ConfirmResponse?) : Screen // 8 Welcome
@@ -43,6 +44,8 @@ sealed interface Screen {
 data class UiState(
     val screen: Screen = Screen.Start,
     val showFormNotice: Boolean = false,
+    /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
+    val shareIncome: Boolean = false,
 )
 
 class OnboardingViewModel(
@@ -54,7 +57,7 @@ class OnboardingViewModel(
     private var applicationId: String?
         get() = saved[KEY_APPLICATION_ID]
         set(value) = saved.set(KEY_APPLICATION_ID, value)
-    private var shareIncome: Boolean
+    private var savedShareIncome: Boolean
         get() = saved[KEY_SHARE_INCOME] ?: false
         set(value) = saved.set(KEY_SHARE_INCOME, value)
     private var lastResponseCode: String?
@@ -62,7 +65,7 @@ class OnboardingViewModel(
         set(value) = saved.set(KEY_LAST_RESPONSE_CODE, value)
 
     private val _state = MutableStateFlow(
-        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Start),
+        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Start, shareIncome = savedShareIncome),
     )
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -73,8 +76,12 @@ class OnboardingViewModel(
 
     private var job: Job? = null
 
-    fun continueWithWallet(shareIncome: Boolean = false) {
-        this.shareIncome = shareIncome
+    fun openConsent() = show(Screen.Consent)
+
+    fun setShareIncome(share: Boolean) = _state.update { it.copy(shareIncome = share) }
+
+    fun continueWithWallet() {
+        savedShareIncome = _state.value.shareIncome
         startApplication()
     }
 
@@ -85,7 +92,13 @@ class OnboardingViewModel(
         job?.cancel()
         applicationId = null
         lastResponseCode = null
-        show(Screen.Start)
+        _state.update { UiState(shareIncome = it.shareIncome) }
+    }
+
+    /** System back: one step back where that makes sense, otherwise abandon the application. */
+    fun back() = when (_state.value.screen) {
+        Screen.Consent -> show(Screen.Start)
+        else -> reset()
     }
 
     fun showFormNotice() = _state.update { it.copy(showFormNotice = true) }
@@ -142,7 +155,7 @@ class OnboardingViewModel(
             try {
                 val created = api.create(
                     CreateApplicationRequest(
-                        shareIncome = shareIncome,
+                        shareIncome = savedShareIncome,
                         returnToApp = BuildConfig.RETURN_TO_APP,
                         stub = BuildConfig.USE_STUB_VERIFIER,
                     ),
