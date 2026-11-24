@@ -20,7 +20,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +78,7 @@ private fun VerifiedDetails(review: ReviewResponse) {
             val name = listOfNotNull(review.identity.givenName, review.identity.familyName).joinToString(" ")
             if (name.isNotBlank()) LabeledValue(stringResource(R.string.review_name), name)
             formatDate(review.identity.birthDate)?.let { LabeledValue(stringResource(R.string.review_birth_date), it) }
+            jsonText(review.identity.nationality)?.let { LabeledValue(stringResource(R.string.review_nationality), it) }
             review.personalNumericCode?.let { LabeledValue(stringResource(R.string.review_cnp), it) }
             addressLines(review.address).takeIf { it.isNotEmpty() }?.let {
                 LabeledValue(stringResource(R.string.review_address), it.joinToString("\n"))
@@ -167,8 +171,11 @@ private fun ContactDetails(
                         )
                     },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                    modifier = Modifier.fillMaxWidth(),
+                    // A one-time code, not a password: keeps autofill from offering to save it.
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { contentType = ContentType.SmsOtpCode },
                 )
             }
         }
