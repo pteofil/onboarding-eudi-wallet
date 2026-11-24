@@ -37,7 +37,7 @@ fun ConfirmScreen(
     StepLayout(title = stringResource(R.string.confirm_title), body = stringResource(R.string.confirm_body)) {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                LabeledValue(stringResource(R.string.confirm_package), packageName)
+                LabeledValue(stringResource(R.string.confirm_package), packageLabel(packageName))
                 LabeledValue(stringResource(R.string.confirm_phone), contact.phone)
                 LabeledValue(stringResource(R.string.confirm_email), contact.email)
             }

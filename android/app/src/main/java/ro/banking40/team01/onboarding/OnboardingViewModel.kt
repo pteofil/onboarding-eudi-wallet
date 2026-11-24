@@ -45,9 +45,12 @@ sealed interface Screen {
     data class Error(val kind: ErrorKind) : Screen
 }
 
+/** Short messages for actions the demo shows but doesn't implement. */
+enum class Notice { FORM, NOT_IN_DEMO }
+
 data class UiState(
     val screen: Screen = Screen.Start,
-    val showFormNotice: Boolean = false,
+    val notice: Notice? = null,
     /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
     val shareIncome: Boolean = false,
     /** GET /review, loaded once the backend says VERIFIED. */
@@ -155,9 +158,9 @@ class OnboardingViewModel(
         }
     }
 
-    fun showFormNotice() = _state.update { it.copy(showFormNotice = true) }
+    fun showNotice(notice: Notice) = _state.update { it.copy(notice = notice) }
 
-    fun dismissFormNotice() = _state.update { it.copy(showFormNotice = false) }
+    fun dismissNotice() = _state.update { it.copy(notice = null) }
 
     fun onWalletNotFound() = show(Screen.Error(ErrorKind.NO_WALLET))
 

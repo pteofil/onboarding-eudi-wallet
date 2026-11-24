@@ -21,13 +21,13 @@ import ro.banking40.team01.ui.theme.VerifiedStartTheme
 @Composable
 fun WelcomeScreen(confirmation: ConfirmResponse?, onDone: () -> Unit) {
     StepLayout(
-        title = stringResource(R.string.welcome_title, stringResource(R.string.bank_name)),
+        title = stringResource(R.string.welcome_title, stringResource(R.string.app_name)),
         body = stringResource(if (confirmation != null) R.string.welcome_body else R.string.welcome_already_confirmed),
     ) {
         if (confirmation != null) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Detail(stringResource(R.string.welcome_package), confirmation.packageName)
+                    Detail(stringResource(R.string.welcome_package), packageLabel(confirmation.packageName))
                     Detail(stringResource(R.string.welcome_iban), confirmation.iban)
                     Detail(stringResource(R.string.welcome_reference), confirmation.reference)
                 }

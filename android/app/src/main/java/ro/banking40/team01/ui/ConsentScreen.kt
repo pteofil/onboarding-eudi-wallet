@@ -2,6 +2,7 @@ package ro.banking40.team01.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,7 +12,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,33 +27,30 @@ import androidx.compose.ui.unit.dp
 import ro.banking40.team01.R
 import ro.banking40.team01.ui.theme.VerifiedStartTheme
 
-/** 2 Consent: what we ask the wallet for, and why. Income is optional and off by default. */
+/**
+ * 2 Consent: what we ask the wallet for, and why; it must match what the wallet shows on approval.
+ * Income is off by default: off asks for ONBOARD_BASIC, on for ONBOARD_FULL (the backend picks by `shareIncome`).
+ */
 @Composable
 fun ConsentScreen(
     shareIncome: Boolean,
     onShareIncomeChange: (Boolean) -> Unit,
     onContinue: () -> Unit,
 ) {
-    StepLayout(
-        title = stringResource(R.string.consent_title),
-        body = stringResource(R.string.consent_body),
-    ) {
+    StepLayout(title = stringResource(R.string.consent_header)) {
         ConsentRow(
             title = stringResource(R.string.consent_identity_title),
-            what = stringResource(R.string.consent_identity_what),
-            why = stringResource(R.string.consent_identity_why),
+            why = stringResource(R.string.consent_identity_body),
             required = true,
         )
         ConsentRow(
             title = stringResource(R.string.consent_address_title),
-            what = stringResource(R.string.consent_address_what),
-            why = stringResource(R.string.consent_address_why),
+            why = stringResource(R.string.consent_address_body),
             required = true,
         )
         ConsentRow(
             title = stringResource(R.string.consent_income_title),
-            what = stringResource(R.string.consent_income_what),
-            why = stringResource(R.string.consent_income_why),
+            why = stringResource(R.string.consent_income_body),
             required = false,
         ) {
             Row(
@@ -58,7 +61,7 @@ fun ConsentScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = stringResource(R.string.consent_income_switch),
+                    text = stringResource(R.string.consent_income_toggle),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f),
                 )
@@ -66,7 +69,7 @@ fun ConsentScreen(
             }
         }
         Text(
-            text = stringResource(R.string.consent_nothing_shared_yet),
+            text = stringResource(R.string.consent_footer),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -79,32 +82,30 @@ fun ConsentScreen(
 @Composable
 private fun ConsentRow(
     title: String,
-    what: String,
     why: String,
     required: Boolean,
     extra: @Composable () -> Unit = {},
 ) {
+    var showWhy by rememberSaveable(title) { mutableStateOf(false) }
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                Text(
-                    text = stringResource(if (required) R.string.consent_required else R.string.consent_optional),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-            }
-            Text(what, style = MaterialTheme.typography.bodyMedium)
             Text(
-                text = stringResource(R.string.consent_why, why),
-                style = MaterialTheme.typography.bodySmall,
+                text = stringResource(if (required) R.string.consent_required else R.string.consent_optional),
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            TextButton(onClick = { showWhy = !showWhy }, contentPadding = PaddingValues(0.dp)) {
+                Text(stringResource(R.string.consent_why_link))
+            }
+            if (showWhy) {
+                Text(why, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+            }
             extra()
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 1200)
 @Composable
-private fun ConsentPreview() = VerifiedStartTheme { ConsentScreen(shareIncome = true, onShareIncomeChange = {}, onContinue = {}) }
+private fun ConsentPreview() = VerifiedStartTheme { ConsentScreen(shareIncome = false, onShareIncomeChange = {}, onContinue = {}) }

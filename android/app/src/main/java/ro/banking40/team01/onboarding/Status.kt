@@ -1,20 +1,20 @@
 package ro.banking40.team01.onboarding
 
 /**
- * Everything that ends the wallet step without an account. One reusable error screen per kind.
- * Withheld income is not here: the backend still verifies and recommends Simple or Starter.
+ * Everything that ends the wallet step without an account. One reusable error screen per kind, with only
+ * "Try again" (when [canRetry]) and "Help". Withheld income is not here: the backend still recommends Simple or Starter.
  */
-enum class ErrorKind(val canRetry: Boolean, val offersForm: Boolean) {
-    DECLINED(canRetry = true, offersForm = false),
-    EXPIRED(canRetry = true, offersForm = false),
-    WALLET_ERROR(canRetry = true, offersForm = false),
-    NOT_VERIFIED(canRetry = true, offersForm = false),
-    MISSING_IDENTITY(canRetry = true, offersForm = true),
-    UNDER_18(canRetry = false, offersForm = false),
+enum class ErrorKind(val canRetry: Boolean) {
+    DECLINED(canRetry = true),
+    EXPIRED(canRetry = true),
+    WALLET_ERROR(canRetry = true),
+    NOT_VERIFIED(canRetry = true),
+    MISSING_IDENTITY(canRetry = true),
+    UNDER_18(canRetry = false),
 
     // App-side, not backend statuses.
-    NO_WALLET(canRetry = true, offersForm = false),
-    TECHNICAL(canRetry = true, offersForm = false),
+    NO_WALLET(canRetry = true),
+    TECHNICAL(canRetry = true),
 }
 
 /** What the app does with a backend `status`. The app never decides on its own: it follows this. */

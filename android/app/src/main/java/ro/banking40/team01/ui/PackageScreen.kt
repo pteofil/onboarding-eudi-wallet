@@ -46,7 +46,8 @@ fun PackageScreen(
         .filter { it in decision.eligible || it in notEligible }
         .sortedBy { if (it == decision.recommended) 0 else if (it in decision.eligible) 1 else 2 }
 
-    StepLayout(title = stringResource(R.string.package_title), body = stringResource(R.string.package_body)) {
+    val body = decision.recommended?.let { stringResource(R.string.pkg_recommendation, packageLabel(it)) }
+    StepLayout(title = stringResource(R.string.package_title), body = body) {
         names.forEach { name ->
             val eligible = name in decision.eligible
             PackageCard(
@@ -68,7 +69,7 @@ fun PackageScreen(
             }
         }
         Button(onClick = onContinue, enabled = selected != null, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.package_continue, selected.orEmpty()))
+            Text(stringResource(R.string.package_continue, selected?.let { packageLabel(it) }.orEmpty()))
         }
     }
 }
@@ -101,7 +102,7 @@ private fun PackageCard(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(name, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                Text(packageLabel(name), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
                 RadioButton(selected = selected, onClick = null, enabled = eligible)
             }
             packageDescription(name)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
@@ -117,40 +118,38 @@ private fun PackageCard(
             }
             if (recommended && decision.insurance.isNotEmpty()) {
                 Text(stringResource(R.string.package_insurance), style = MaterialTheme.typography.labelMedium)
-                decision.insurance.forEach { (key, line) -> InsuranceRow(key, line) }
+                decision.insurance.values.forEach { InsuranceRow(it) }
             }
         }
     }
 }
 
+/** The backend's code picks our copy, e.g. "Travel insurance isn't available at your age (up to age 70)." */
 @Composable
-private fun InsuranceRow(key: String, line: InsuranceLine) {
-    val label = when (key) {
-        "travel" -> stringResource(R.string.package_insurance_travel)
-        "life" -> stringResource(R.string.package_insurance_life)
-        else -> key.replaceFirstChar(Char::uppercase)
-    }
-    val status = stringResource(
-        if (line.available) R.string.package_insurance_included else R.string.package_insurance_not_available,
+private fun InsuranceRow(line: InsuranceLine) {
+    Text(
+        "${if (line.available) "✓" else "–"} ${reasonText(line.reason)}",
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (line.available) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.secondary,
     )
-    Column {
-        Text(
-            "${if (line.available) "✓" else "–"} $label · $status",
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (line.available) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.secondary,
-        )
-        reasonText(line.reason).takeIf { it.isNotBlank() }?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-        }
-    }
+}
+
+/** Display name for a backend package id; unknown ids are shown as they come. */
+@Composable
+fun packageLabel(name: String): String = when (name) {
+    "Simple" -> stringResource(R.string.pkg_simple)
+    "Starter" -> stringResource(R.string.pkg_starter)
+    "Plus" -> stringResource(R.string.pkg_plus)
+    "Premium" -> stringResource(R.string.pkg_premium)
+    else -> name
 }
 
 @Composable
 private fun packageDescription(name: String): String? = when (name) {
-    "Simple" -> stringResource(R.string.package_desc_simple)
-    "Starter" -> stringResource(R.string.package_desc_starter)
-    "Plus" -> stringResource(R.string.package_desc_plus)
-    "Premium" -> stringResource(R.string.package_desc_premium)
+    "Simple" -> stringResource(R.string.pkg_simple_desc)
+    "Starter" -> stringResource(R.string.pkg_starter_desc)
+    "Plus" -> stringResource(R.string.pkg_plus_desc)
+    "Premium" -> stringResource(R.string.pkg_premium_desc)
     else -> null
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ro.banking40.team01.R
+import ro.banking40.team01.onboarding.Notice
 import ro.banking40.team01.onboarding.OnboardingViewModel
 import ro.banking40.team01.onboarding.Screen
 
@@ -22,12 +23,16 @@ import ro.banking40.team01.onboarding.Screen
 fun OnboardingApp(viewModel: OnboardingViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    val formNotice = stringResource(R.string.form_not_available)
+    val noticeText = when (state.notice) {
+        Notice.FORM -> stringResource(R.string.form_not_available)
+        Notice.NOT_IN_DEMO -> stringResource(R.string.not_in_demo)
+        null -> null
+    }
 
-    LaunchedEffect(state.showFormNotice) {
-        if (state.showFormNotice) {
-            snackbar.showSnackbar(formNotice)
-            viewModel.dismissFormNotice()
+    LaunchedEffect(state.notice) {
+        if (noticeText != null) {
+            snackbar.showSnackbar(noticeText)
+            viewModel.dismissNotice()
         }
     }
     BackHandler(enabled = state.screen != Screen.Start) { viewModel.back() }
@@ -37,7 +42,7 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
             when (val screen = state.screen) {
                 Screen.Start -> StartScreen(
                     onContinue = viewModel::openConsent,
-                    onFillForm = viewModel::showFormNotice,
+                    onFillForm = { viewModel.showNotice(Notice.FORM) },
                 )
                 Screen.Consent -> ConsentScreen(
                     shareIncome = state.shareIncome,
@@ -79,8 +84,8 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,
                     onTryAgain = viewModel::tryAgain,
-                    onFillForm = viewModel::showFormNotice,
-                    onBackToStart = viewModel::reset,
+                    onMinors = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
+                    onHelp = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
                 )
             }
         }
