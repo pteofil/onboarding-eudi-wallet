@@ -1,7 +1,6 @@
 package ro.banking40.team01.wallet
 
 import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
 /**
  * Parses the URI the EUDI Wallet opens when it hands the customer back to the app:
@@ -34,5 +33,5 @@ object WalletReturn {
 
     // Percent-decoding only: a literal '+' in a code must stay a '+', not become a space.
     private fun decode(value: String): String =
-        URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8)
+        URLDecoder.decode(value.replace("+", "%2B"), "UTF-8") // the Charset overload is API 33+
 }
