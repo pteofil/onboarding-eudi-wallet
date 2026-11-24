@@ -121,7 +121,7 @@
     <string name="dashboard_logout">Log out</string>
     <string name="dashboard_greeting">Hello, %1$s</string>
     <string name="dashboard_greeting_plain">Hello</string>
-    <string name="dashboard_balance_label">Available balance</string>
+    <string name="dashboard_balance_label">Available balance (demo data)</string>
     <string name="dashboard_balance">987.00 RON</string>
     <string name="dashboard_opened_in">Account opened in %1$s with your EUDI Wallet</string>
     <string name="duration_seconds">%1$d s</string>
