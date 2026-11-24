@@ -25,7 +25,9 @@ STUB_INCOME = {
 class StubVerifier:
     """Stateless (Lambda instances don't share memory): the profile is encoded in the transaction id."""
 
-    def start(self, profile: str, return_uri: str | None = None) -> dict:
+    accepts_stub = True
+
+    def start(self, profile: str, return_uri: str | None = None, stub: bool = True) -> dict:
         tx = f"stub-{'full' if profile.lower().endswith('full') else 'basic'}-{uuid.uuid4()}"
         deep_link = f"{return_uri}#response_code=stub-code" if return_uri else "openid4vp://stub"
         return {"transactionId": tx, "deepLink": deep_link}

@@ -53,7 +53,8 @@ def route(service: OnboardingService, method: str, path: str, data: dict) -> dic
         match = pattern.match(path)
         if match and method == route_method:
             if action == "create":
-                return service.create(bool(data.get("shareIncome")), bool(data.get("returnToApp")))
+                return service.create(bool(data.get("shareIncome")), bool(data.get("returnToApp")),
+                                      bool(data.get("stub")))
             app_id = match.group(1)
             if action == "claim":
                 return service.claim(app_id, data.get("responseCode", ""))
@@ -85,12 +86,40 @@ def build_service(env) -> OnboardingService:
         log.warning("STUB VERIFIER: results are NOT verified")
     else:
         verifier, open_sealed = _real_verifier(env)
+        if env.get("ALLOW_STUB") == "1":
+            verifier, open_sealed = _with_stub_on_request(verifier, open_sealed)
     recommend, link_income = _rules()
     return OnboardingService(
         store, verifier, open_sealed, env.get("PROFILE_BASIC", "ONBOARD_BASIC"),
         env.get("PROFILE_FULL", "ONBOARD_FULL"), env.get("VERIFIER_RETURN_URI") or None,
         recommend, link_income,
     )
+
+
+def _with_stub_on_request(real, real_open_sealed):
+    """Real verifier by default; `{"stub": true}` on create uses the stub. Later calls route by tx id."""
+    from stub_verifier import StubVerifier
+
+    stub_verifier = StubVerifier()
+
+    class Router:
+        accepts_stub = True
+
+        def start(self, profile, return_uri=None, stub=False):
+            if stub:
+                log.warning("STUB VERIFIER on request: results are NOT verified")
+                return stub_verifier.start(profile, return_uri)
+            return real.start(profile, return_uri)
+
+        def __getattr__(self, name):
+            return lambda tx, *args: getattr(stub_verifier if tx.startswith("stub-") else real, name)(tx, *args)
+
+    def open_sealed(sealed: str, transaction_id: str) -> dict:
+        if transaction_id.startswith("stub-"):
+            return json.loads(sealed)
+        return real_open_sealed(sealed, transaction_id)
+
+    return Router(), open_sealed
 
 
 def _real_verifier(env):

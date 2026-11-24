@@ -183,3 +183,29 @@ def test_stub_flow_through_lambda_handler(monkeypatch):
     assert call("POST", f"{app}/confirm", {})[1]["status"] == "CONFIRMED"
     assert call("GET", "/nope")[0] == 404
     assert call("GET", "/applications/unknown/status")[0] == 404
+
+
+def test_stub_on_request_alongside_real_verifier(monkeypatch):
+    import base64
+
+    import handler
+
+    key = jwk.JWK.generate(kty="EC", crv="P-256").export_to_pem(private_key=True, password=None)
+    env = {"VERIFIER_BASE_URL": "https://verifier.invalid", "VERIFIER_WEBSITE_KEY": "k", "VERIFIER_WEBSITE_SECRET": "s",
+           "VERIFIER_AUDIENCE": "aud", "RESULT_PRIVATE_KEY_B64": base64.b64encode(key).decode(),
+           "PROFILE_BASIC": "onboard-basic", "PROFILE_FULL": "onboard-full"}
+
+    def call(body, path="/applications", method="POST"):
+        response = lambda_handler({"rawPath": path, "body": json.dumps(body) if body else None,
+                                   "requestContext": {"http": {"method": method}}})
+        return response["statusCode"], json.loads(response["body"])
+
+    monkeypatch.setattr(handler, "_service", build_service(env))
+    assert call({"shareIncome": True, "stub": True})[0] == 400
+
+    monkeypatch.setattr(handler, "_service", build_service({**env, "ALLOW_STUB": "1"}))
+    _, created = call({"shareIncome": True, "stub": True})
+    app_id = created["applicationId"]
+    assert call(None, f"/applications/{app_id}/status", "GET")[1]["status"] == "VERIFIED"
+    review = call(None, f"/applications/{app_id}/review", "GET")[1]
+    assert review["stub"] is True and review["incomeShared"] is True

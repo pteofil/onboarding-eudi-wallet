@@ -40,11 +40,14 @@ class OnboardingService:
         self.profile_basic, self.profile_full, self.return_uri = profile_basic, profile_full, return_uri
         self.recommend, self.link_income, self.clock, self.today = recommend, link_income, clock, today
 
-    def create(self, share_income: bool, return_to_app: bool = False) -> dict:
+    def create(self, share_income: bool, return_to_app: bool = False, stub: bool = False) -> dict:
         # With a return URI the verifier withholds status and result until the app claims with the
         # wallet's response_code, so only ask for it when the app can actually receive the callback.
         profile = self.profile_full if share_income else self.profile_basic
-        started = self.verifier.start(profile, self.return_uri if return_to_app else None)
+        return_uri = self.return_uri if return_to_app else None
+        if stub and not getattr(self.verifier, "accepts_stub", False):
+            raise BadRequest("stub is not enabled on this backend")
+        started = self.verifier.start(profile, return_uri, stub=True) if stub else self.verifier.start(profile, return_uri)
         app_id = str(uuid.uuid4())
         app = {"id": app_id, "state": "PENDING", "transactionId": started["transactionId"],
                "shareIncome": share_income, "createdAt": int(self.clock())}
@@ -73,7 +76,8 @@ class OnboardingService:
         app = self._load(app_id)
         if app["state"] != "VERIFIED":
             raise BadRequest(f"application is {app['state']}")
-        return {"applicationId": app_id, **app["display"], "decision": app["decision"]}
+        return {"applicationId": app_id, **app["display"], "decision": app["decision"],
+                **({"stub": True} if app["transactionId"].startswith("stub-") else {})}
 
     def confirm(self, app_id: str, package: Optional[str]) -> dict:
         app = self._load(app_id)
