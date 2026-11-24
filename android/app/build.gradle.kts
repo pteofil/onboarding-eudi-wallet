@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -57,8 +58,11 @@ android {
     }
 }
 
+// Builds on whatever JDK runs Gradle (e.g. Android Studio's bundled JBR) and emits Java 17 bytecode.
 kotlin {
-    jvmToolchain(17)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
 }
 
 if (teamKeyFile == null) {

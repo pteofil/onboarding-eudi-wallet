@@ -42,7 +42,7 @@ Secrets live only in `backend/.env` (local) and Lambda environment variables (cl
 
 ## Android
 Kotlin + Compose, one Activity, ViewModel + StateFlow, Retrofit/OkHttp + kotlinx.serialization.
-JDK 17, compileSdk 37, minSdk 29, Gradle 9.8.2, AGP 9.5.1, Kotlin 2.4.21.
+Java 17 bytecode (builds on Android Studio's bundled JDK), compileSdk 37, minSdk 29, Gradle 9.8.2, AGP 9.5.1, Kotlin 2.4.21.
 
 1. Copy `android/local.properties.example` to `android/local.properties` (git-ignored) and fill in:
    - `backendBaseUrl` - `http://localhost:8081` (with `adb reverse tcp:8081 tcp:8081`) or the Lambda Function URL
