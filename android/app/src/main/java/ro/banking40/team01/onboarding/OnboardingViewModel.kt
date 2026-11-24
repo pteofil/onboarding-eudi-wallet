@@ -26,6 +26,7 @@ import ro.banking40.team01.api.ConfirmRequest
 import ro.banking40.team01.api.ConfirmResponse
 import ro.banking40.team01.api.CreateApplicationRequest
 import ro.banking40.team01.api.OnboardingApi
+import ro.banking40.team01.api.ReviewResponse
 import ro.banking40.team01.api.backendErrorCode
 import ro.banking40.team01.wallet.WalletReturn
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,6 +38,7 @@ sealed interface Screen {
     data object Consent : Screen // 2 Consent
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
+    data object Review : Screen // 5 Review your details
     data class Welcome(val confirmation: ConfirmResponse?) : Screen // 8 Welcome
     data class Error(val kind: ErrorKind) : Screen
 }
@@ -46,6 +48,9 @@ data class UiState(
     val showFormNotice: Boolean = false,
     /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
     val shareIncome: Boolean = false,
+    /** GET /review, loaded once the backend says VERIFIED. */
+    val review: ReviewResponse? = null,
+    val contact: Contact = Contact(),
 )
 
 class OnboardingViewModel(
@@ -101,6 +106,23 @@ class OnboardingViewModel(
         else -> reset()
     }
 
+    fun onPhoneChange(phone: String) = updateContact { it.copy(phone = phone) }
+
+    fun onEmailChange(email: String) = updateContact { it.copy(email = email.trim()) }
+
+    fun sendOtp() = updateContact { it.copy(otpSent = true, otp = "") }
+
+    fun onOtpChange(otp: String) =
+        updateContact { it.copy(otp = otp.filter(Char::isDigit).take(Contact.OTP_LENGTH)) }
+
+    fun continueFromReview() {
+        val id = applicationId ?: return
+        if (!_state.value.contact.complete) return
+        // Temporary until Your package (6) and Confirm (7) exist.
+        job?.cancel()
+        job = viewModelScope.launch { confirmRecommended(id) }
+    }
+
     fun showFormNotice() = _state.update { it.copy(showFormNotice = true) }
 
     fun dismissFormNotice() = _state.update { it.copy(showFormNotice = false) }
@@ -150,7 +172,7 @@ class OnboardingViewModel(
         job?.cancel()
         applicationId = null
         lastResponseCode = null
-        show(Screen.Handoff)
+        _state.update { it.copy(screen = Screen.Handoff, review = null) }
         job = viewModelScope.launch {
             try {
                 val created = api.create(
@@ -197,8 +219,7 @@ class OnboardingViewModel(
     private suspend fun handle(id: String, status: String): Boolean {
         when (val outcome = outcomeOf(status)) {
             StatusOutcome.KeepPolling -> return false
-            // Temporary 4 -> 8 shortcut until Review/Package/Confirm (5-7) exist.
-            StatusOutcome.Verified -> confirmRecommended(id)
+            StatusOutcome.Verified -> loadReview(id)
             StatusOutcome.Confirmed -> show(Screen.Welcome(confirmation = null))
             is StatusOutcome.Failed -> show(Screen.Error(outcome.kind))
         }
@@ -206,9 +227,23 @@ class OnboardingViewModel(
         return true
     }
 
+    private suspend fun loadReview(id: String) {
+        show(Screen.Verifying)
+        try {
+            val review = api.review(id)
+            _state.update { it.copy(review = review, screen = Screen.Review) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            fail("Review", e)
+        }
+    }
+
     private suspend fun confirmRecommended(id: String) {
         try {
-            show(Screen.Welcome(api.confirm(id, ConfirmRequest())))
+            val confirmation = api.confirm(id, ConfirmRequest())
+            // The verified details are no longer needed once the account is opened.
+            _state.update { it.copy(screen = Screen.Welcome(confirmation), review = null, contact = Contact()) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -220,6 +255,9 @@ class OnboardingViewModel(
         Log.w(TAG, "$step failed: ${e.describe()}")
         show(Screen.Error(ErrorKind.TECHNICAL))
     }
+
+    private fun updateContact(change: (Contact) -> Contact) =
+        _state.update { it.copy(contact = change(it.contact)) }
 
     private fun show(screen: Screen) = _state.update { it.copy(screen = screen) }
 

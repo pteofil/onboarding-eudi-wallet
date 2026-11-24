@@ -39,6 +39,35 @@
     <string name="verifying_title">Verifying your details…</string>
     <string name="verifying_body">We are checking that your documents are genuine and valid. This takes a few seconds.</string>
 
+    <!-- 5 Review your details -->
+    <string name="review_title">Review your details</string>
+    <string name="review_body">These details come from your EUDI Wallet. They are verified, so they can\'t be edited.</string>
+    <string name="review_verified_section">Your details</string>
+    <string name="review_name">Name</string>
+    <string name="review_birth_date">Date of birth</string>
+    <string name="review_cnp">Personal numeric code</string>
+    <string name="review_address">Address</string>
+    <string name="review_income">Income</string>
+    <string name="review_income_shared">Shared and verified</string>
+    <string name="review_income_not_shared">Not shared</string>
+    <string name="review_contact_section">How can we reach you?</string>
+    <string name="review_phone">Mobile phone</string>
+    <string name="review_email">Email</string>
+    <string name="review_send_code">Send confirmation code</string>
+    <string name="review_code">Confirmation code</string>
+    <string name="review_code_hint">Demo: no SMS is sent. Enter any 6 digits.</string>
+    <string name="review_code_confirmed">✓ Phone number confirmed</string>
+    <string name="review_continue">Continue</string>
+    <string name="trust_show">What we checked (%1$d)</string>
+    <string name="trust_hide">Hide checks (%1$d)</string>
+    <string name="trust_failed">failed</string>
+    <string name="trust_not_shared">not shared</string>
+    <string name="trust_skipped">skipped</string>
+
+    <!-- Shared badges -->
+    <string name="verified_badge">✓ Verified via EUDI Wallet</string>
+    <string name="test_data_chip">TEST DATA</string>
+
     <!-- 8 Welcome -->
     <string name="welcome_title">Welcome to %1$s!</string>
     <string name="welcome_body">Your account is open.</string>

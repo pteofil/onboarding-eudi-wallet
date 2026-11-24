@@ -46,6 +46,17 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                 )
                 Screen.Handoff -> HandoffScreen(onTryAgain = viewModel::tryAgain)
                 Screen.Verifying -> VerifyingScreen()
+                Screen.Review -> state.review?.let { review ->
+                    ReviewScreen(
+                        review = review,
+                        contact = state.contact,
+                        onPhoneChange = viewModel::onPhoneChange,
+                        onEmailChange = viewModel::onEmailChange,
+                        onSendOtp = viewModel::sendOtp,
+                        onOtpChange = viewModel::onOtpChange,
+                        onContinue = viewModel::continueFromReview,
+                    )
+                }
                 is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::reset)
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,

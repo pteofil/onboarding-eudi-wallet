@@ -39,6 +39,28 @@ data class ReviewResponse(
     val incomeShared: Boolean = false,
     val withheld: List<String> = emptyList(),
     val decision: Decision,
+    val trust: TrustReport? = null,
+    /** True when the backend's stub verifier produced this data: show a TEST DATA marker. */
+    val stub: Boolean = false,
+)
+
+/** What the backend checked before using the wallet data. Labels only, no claim values. */
+@Serializable
+data class TrustReport(
+    val checkedAt: String? = null,
+    val credentials: List<String> = emptyList(),
+    val checks: List<TrustCheck> = emptyList(),
+    val note: String? = null,
+)
+
+@Serializable
+data class TrustCheck(
+    val id: String,
+    val label: String,
+    val by: String? = null,
+    /** passed, failed, skipped or not_shared. */
+    val result: String,
+    val detail: String? = null,
 )
 
 @Serializable
