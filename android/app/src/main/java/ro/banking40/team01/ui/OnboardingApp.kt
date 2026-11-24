@@ -66,6 +66,16 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                         onContinue = viewModel::continueFromPackage,
                     )
                 }
+                Screen.Confirm -> state.selectedPackage?.let { selected ->
+                    ConfirmScreen(
+                        packageName = selected,
+                        contact = state.contact,
+                        termsAccepted = state.termsAccepted,
+                        signing = state.signing,
+                        onTermsChange = viewModel::setTermsAccepted,
+                        onSign = viewModel::sign,
+                    )
+                }
                 is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::reset)
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,

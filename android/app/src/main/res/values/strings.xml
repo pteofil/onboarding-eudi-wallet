@@ -83,6 +83,17 @@
     <string name="package_desc_plus">Higher limits, a second card and cashback on purchases.</string>
     <string name="package_desc_premium">Premium card, dedicated support and insurance.</string>
 
+    <!-- 7 Confirm -->
+    <string name="confirm_title">Confirm and sign</string>
+    <string name="confirm_body">Check your choice, accept the terms and sign to open your account.</string>
+    <string name="confirm_package">Package</string>
+    <string name="confirm_phone">Mobile phone</string>
+    <string name="confirm_email">Email</string>
+    <string name="confirm_terms">I have read and accept the account terms and conditions and the privacy notice.</string>
+    <string name="confirm_sign">Sign</string>
+    <string name="confirm_signing">Signing…</string>
+    <string name="confirm_sign_note">Demo: signing is simulated, no real signature is created.</string>
+
     <!-- Shared badges -->
     <string name="verified_badge">✓ Verified via EUDI Wallet</string>
     <string name="test_data_chip">TEST DATA</string>

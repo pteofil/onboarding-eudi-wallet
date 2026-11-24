@@ -40,6 +40,7 @@ sealed interface Screen {
     data object Verifying : Screen // 4 Verifying
     data object Review : Screen // 5 Review your details
     data object Package : Screen // 6 Your package
+    data object Confirm : Screen // 7 Confirm
     data class Welcome(val confirmation: ConfirmResponse?) : Screen // 8 Welcome
     data class Error(val kind: ErrorKind) : Screen
 }
@@ -54,6 +55,9 @@ data class UiState(
     val contact: Contact = Contact(),
     /** Starts as the backend's recommendation; the customer may pick another eligible package. */
     val selectedPackage: String? = null,
+    val termsAccepted: Boolean = false,
+    /** True while the simulated signature and POST /confirm run. */
+    val signing: Boolean = false,
 )
 
 class OnboardingViewModel(
@@ -107,6 +111,7 @@ class OnboardingViewModel(
     fun back() = when (_state.value.screen) {
         Screen.Consent -> show(Screen.Start)
         Screen.Package -> show(Screen.Review)
+        Screen.Confirm -> if (!_state.value.signing) show(Screen.Package) else Unit
         else -> reset()
     }
 
@@ -129,11 +134,23 @@ class OnboardingViewModel(
     }
 
     fun continueFromPackage() {
+        if (_state.value.selectedPackage != null) show(Screen.Confirm)
+    }
+
+    fun setTermsAccepted(accepted: Boolean) = _state.update { it.copy(termsAccepted = accepted) }
+
+    /** Signing is simulated (no real SCA); then the backend opens the account. */
+    fun sign() {
         val id = applicationId ?: return
-        val selected = _state.value.selectedPackage ?: return
-        // Temporary until Confirm (7) exists.
+        val state = _state.value
+        val selected = state.selectedPackage ?: return
+        if (!state.termsAccepted || state.signing) return
         job?.cancel()
-        job = viewModelScope.launch { confirm(id, selected) }
+        _state.update { it.copy(signing = true) }
+        job = viewModelScope.launch {
+            delay(SIMULATED_SIGNING)
+            confirm(id, selected)
+        }
     }
 
     fun showFormNotice() = _state.update { it.copy(showFormNotice = true) }
@@ -185,7 +202,7 @@ class OnboardingViewModel(
         job?.cancel()
         applicationId = null
         lastResponseCode = null
-        _state.update { it.copy(screen = Screen.Handoff, review = null) }
+        _state.update { UiState(screen = Screen.Handoff, shareIncome = it.shareIncome) }
         job = viewModelScope.launch {
             try {
                 val created = api.create(
@@ -258,7 +275,7 @@ class OnboardingViewModel(
         try {
             val confirmation = api.confirm(id, ConfirmRequest(packageName))
             // The verified details are no longer needed once the account is opened.
-            _state.update { it.copy(screen = Screen.Welcome(confirmation), review = null, contact = Contact(), selectedPackage = null) }
+            _state.update { UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -268,7 +285,7 @@ class OnboardingViewModel(
 
     private fun fail(step: String, e: Exception) {
         Log.w(TAG, "$step failed: ${e.describe()}")
-        show(Screen.Error(ErrorKind.TECHNICAL))
+        _state.update { it.copy(screen = Screen.Error(ErrorKind.TECHNICAL), signing = false) }
     }
 
     private fun updateContact(change: (Contact) -> Contact) =
@@ -286,6 +303,7 @@ class OnboardingViewModel(
         private const val KEY_LAST_RESPONSE_CODE = "lastResponseCode"
         private val POLL_INTERVAL = 1500.milliseconds
         private val POLL_TIMEOUT = 3.minutes
+        private val SIMULATED_SIGNING = 1200.milliseconds
 
         val Factory = viewModelFactory {
             initializer {
