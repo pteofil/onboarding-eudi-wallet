@@ -1,0 +1,21 @@
+# Machine-specific settings, signing paths and passwords
+local.properties
+
+# Build outputs
+.gradle/
+.kotlin/
+build/
+*.apk
+*.aab
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE
+.idea/
+*.iml
+
+# Signing keys never belong in the repo
+*.p12
+*.jks
+*.keystore

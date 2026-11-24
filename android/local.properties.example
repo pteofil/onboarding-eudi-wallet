@@ -1,0 +1,13 @@
+# Copy to local.properties (git-ignored) and fill in. Never commit the real file.
+# Android Studio writes sdk.dir for you.
+sdk.dir=/Users/<you>/Library/Android/sdk
+
+# Backend: local server through `adb reverse tcp:8081 tcp:8081`, or the Lambda Function URL.
+backendBaseUrl=http://localhost:8081
+
+# team-debug.p12 from the team ZIP (android-sdk/). Keep it OUTSIDE the repo.
+# Values for the password and alias are in android-sdk/README.md of the team ZIP.
+teamDebug.storeFile=/absolute/path/outside/repo/team-debug.p12
+teamDebug.storePassword=
+teamDebug.keyAlias=androiddebugkey
+teamDebug.keyPassword=
