@@ -64,16 +64,36 @@ def test_thresholds_configurable(monkeypatch):
 
 
 def test_income_not_shared_explains_how_to_unlock():
-    reasons = [n["reason"] for n in recommend(pid(40), None, TODAY)["notEligible"]]
-    assert any("Share your income" in r for r in reasons)
+    out = recommend(pid(40), None, TODAY)
+    assert [n["code"] for n in out["notEligible"]] == ["STARTER_TOO_OLD", "NEEDS_PLUS", "NEEDS_PREMIUM"]
+    assert [r["code"] for r in out["reasons"]] == ["AGE_ADULT", "INCOME_NOT_SHARED"]
+
+
+def test_variable_income_uses_lowest_month():
+    # Bogdan's "variable" scenario: the average (6,100) would reach Plus, the lowest month (1,900) doesn't.
+    amounts = [2400, 11200, 3800, 9200, 1900, 8100]
+    inc = income(0)
+    inc["monthly_income"]["periods"] = [{"month": f"2026-0{i + 1}", "net_amount_minor": a * 100}
+                                        for i, a in enumerate(amounts)]
+    out = recommend(pid(35), inc, TODAY)
+    assert out["recommended"] == "Simple"
+    assert out["reasons"][-1] == {"code": "LOWEST_MONTH", "amount": "1,900",
+                                  "text": "We used your lowest month of the last six (1,900 RON net)."}
+
+
+def test_premium_reasons_carry_amount_and_insurance_codes():
+    out = recommend(pid(35), income(16000), TODAY)
+    assert out["reasons"][1] == {"code": "INCOME_PREMIUM", "amount": "16,000", "text": out["reasons"][1]["text"]}
+    assert (out["insurance"]["travel"]["code"], out["insurance"]["life"]["code"]) == ("TRAVEL_INS_OK", "LIFE_INS_OK")
 
 
 def test_linker_accepts_own_ron_income():
     linked, reason = link_income({"personal_numeric_code": CNP}, income(5000), 0)
-    assert linked is not None and reason == "income linked"
+    assert linked is not None and reason["code"] == "INCOME_LINKED"
 
 
 @pytest.mark.parametrize("inc", [income(5000, cnp="2900101123456"), income(5000, currency="EUR"),
                                  {"subject": {"personal_numeric_code": CNP}, "monthly_income": {"currency": "RON", "periods": []}}])
 def test_linker_rejects(inc):
-    assert link_income({"personal_numeric_code": CNP}, inc, 0)[0] is None
+    linked, reason = link_income({"personal_numeric_code": CNP}, inc, 0)
+    assert linked is None and reason["code"] in ("INCOME_NOT_LINKED", "INCOME_UNUSABLE")

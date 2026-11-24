@@ -157,14 +157,16 @@ def provisional_recommend(pid: dict, income: Optional[dict], today: date) -> dic
     age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
     if age < 18:
         return {"status": "NOT_ELIGIBLE", "recommended": None, "eligible": [], "notEligible": [],
-                "reasons": ["You need to be 18 to open an account on your own"], "assumptions": []}
+                "reasons": [{"code": "AGE_UNDER_18", "text": "You need to be 18 to open an account on your own.",
+                             "age": age}], "assumptions": []}
     return {"status": "ELIGIBLE", "recommended": "Simple", "eligible": ["Simple"], "notEligible": [],
-            "insurance": {}, "reasons": [f"You're {age} → Simple"], "assumptions": ["provisional rules"]}
+            "insurance": {}, "reasons": [{"code": "AGE_ADULT", "text": f"You're {age}, so you can open an account on your own.",
+                                     "age": age}], "assumptions": []}
 
 
 def provisional_link_income(pid: dict, income: dict, now: float):
     """Placeholder until linker.py lands: CNP match only."""
     subject = (income.get("subject") or {}).get("personal_numeric_code")
     if subject and subject == pid.get("personal_numeric_code"):
-        return income, "income linked"
-    return None, "Income document belongs to someone else"
+        return income, {"code": "INCOME_LINKED", "text": "Income linked"}
+    return None, {"code": "INCOME_NOT_LINKED", "text": "We couldn't match your income document to your identity."}

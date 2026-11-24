@@ -19,6 +19,16 @@ def lowest_monthly_ron(income: dict) -> float:
     return min(p["net_amount_minor"] for p in income["monthly_income"]["periods"]) / 100
 
 
+def reason(code: str, text: str, **values) -> dict:
+    """A reason the app shows from its own strings by `code` (Bogdan's strings.xml: reason_<code lower case>).
+    `text` is the English fallback; `age` (int) and `amount` (e.g. "16,000") fill the placeholders."""
+    return {"code": code, "text": text, **values}
+
+
+def _ron(value: float) -> str:
+    return f"{value:,.0f}"
+
+
 def recommend(pid: dict, income: Optional[dict], today: date) -> dict:
     starter_max = _cfg("STARTER_MAX_AGE", 25)
     plus_min = _cfg("PLUS_MIN_MONTHLY_RON", 5000)
@@ -27,54 +37,61 @@ def recommend(pid: dict, income: Optional[dict], today: date) -> dict:
     life_max = _cfg("LIFE_INSURANCE_MAX_AGE", 80)
 
     age = age_on(pid.get("birth_date") or pid["birthdate"], today)
-    assumptions = [f"Age is counted on {today.isoformat()}"]
+    assumptions = [reason("FICTIONAL", "Prices and benefits belong to a fictional bank and are for demonstration only.")]
     if age < 18:
         return {"status": "NOT_ELIGIBLE", "recommended": None, "eligible": [], "notEligible": [],
-                "insurance": {}, "reasons": ["You need to be 18 to open an account on your own"],
-                "assumptions": assumptions}
+                "insurance": {}, "assumptions": assumptions,
+                "reasons": [reason("AGE_UNDER_18", "You need to be 18 to open an account on your own.", age=age)]}
 
     eligible, not_eligible = ["Simple"], []
-    reasons = [f"You're {age}, so you can open an account"]
+    reasons = [reason("AGE_ADULT", f"You're {age}, so you can open an account on your own.", age=age)]
 
     if age <= starter_max:
         eligible.append("Starter")
-        reasons.append(f"You're {age} → Starter (up to age {starter_max})")
+        reasons.append(reason("STARTER_AGE", f"You're {age}, so Starter is free for you.", age=age))
     else:
-        not_eligible.append({"package": "Starter", "reason": f"Starter is for ages 18–{starter_max}"})
+        not_eligible.append({"package": "Starter",
+                             **reason("STARTER_TOO_OLD", f"Starter is for ages 18–{starter_max}.")})
 
     tiers = [("Plus", plus_min), ("Premium", premium_min)]
-    if income is None:
-        for name, minimum in tiers:
-            not_eligible.append({"package": name,
-                                 "reason": f"Share your income to unlock {name} (from {minimum:,} RON/month)"})
-    else:
-        monthly = lowest_monthly_ron(income)
-        assumptions.append("Income = the lowest net monthly amount of the last 6 months")
-        for name, minimum in tiers:
-            if monthly >= minimum:
-                eligible.append(name)
-            else:
-                not_eligible.append({"package": name, "reason": f"{name} needs at least {minimum:,} RON/month"})
-
-        if eligible[-1] in ("Plus", "Premium"):
-            reasons.append(f"Your verified income of {monthly:,.0f} RON/month → {eligible[-1]}")
+    monthly = lowest_monthly_ron(income) if income is not None else None
+    for name, minimum in tiers:
+        if monthly is not None and monthly >= minimum:
+            eligible.append(name)
         else:
-            reasons.append(f"Your verified income of {monthly:,.0f} RON/month is below Plus")
+            not_eligible.append({"package": name, **reason(
+                f"NEEDS_{name.upper()}", f"{name} needs a net income of at least {_ron(minimum)} RON a month.",
+                amount=_ron(minimum))})
+
+    if monthly is None:
+        reasons.append(reason("INCOME_NOT_SHARED",
+                              "You didn't share your income, so we've shown packages that don't need it."))
+    else:
+        if eligible[-1] in ("Plus", "Premium"):
+            reasons.append(reason(f"INCOME_{eligible[-1].upper()}",
+                                  f"Your verified net income (lowest month: {_ron(monthly)} RON) qualifies you "
+                                  f"for {eligible[-1]}.", amount=_ron(monthly)))
+        reasons.append(reason("LOWEST_MONTH", f"We used your lowest month of the last six ({_ron(monthly)} RON net).",
+                              amount=_ron(monthly)))
+        assumptions.append(reason("INCOME", "We used your net income for the last six months; "
+                                            "this isn't a credit assessment."))
 
     recommended = max(eligible, key=LADDER.index)
     insurance = {}
     if recommended == "Premium":
         insurance = {
-            "travel": _insurance("Travel", age, travel_max),
-            "life": _insurance("Life", age, life_max),
+            "travel": _insurance("TRAVEL", "Travel", age, travel_max),
+            "life": _insurance("LIFE", "Life", age, life_max),
         }
-        assumptions.append("Insurance age limits apply at policy start (today)")
+        assumptions.append(reason("INSURANCE", "Insurance availability is based on your age today."))
     return {"status": "ELIGIBLE", "recommended": recommended, "eligible": eligible,
             "notEligible": not_eligible, "insurance": insurance, "reasons": reasons,
             "assumptions": assumptions}
 
 
-def _insurance(label: str, age: int, max_age: int) -> dict:
+def _insurance(code: str, label: str, age: int, max_age: int) -> dict:
     if age < max_age:
-        return {"available": True, "reason": f"{label} insurance is included (available up to age {max_age})"}
-    return {"available": False, "reason": f"{label} insurance is not available from age {max_age}"}
+        return {"available": True,
+                **reason(f"{code}_INS_OK", f"{label} insurance is included (available up to age {max_age}).")}
+    return {"available": False,
+            **reason(f"{code}_INS_AGE", f"{label} insurance isn't available at your age (up to age {max_age}).")}

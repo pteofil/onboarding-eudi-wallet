@@ -64,6 +64,10 @@ def shape(value):
 
 for credential in payload.get("credentials", []):
     print(f"  {credential.get('type')}: {json.dumps(shape(credential.get('claims') or {}))}")
+    # Credential metadata (format, issuer, validity, status), not claim values.
+    meta = {k: v for k, v in credential.items() if k not in ("type", "claims")}
+    if meta:
+        print(f"    meta: {json.dumps(meta)[:400]}")
 
 
 if decide:
@@ -75,7 +79,7 @@ if decide:
 
     pid, _, income = split_credentials(payload.get("credentials", []))
     print(f"\nage today: {age_on(pid['birth_date'], date.today())}  CNP: {mask(pid.get('personal_numeric_code'))}")
-    linked, note = None, "income not shared"
+    linked, note = None, {"code": "INCOME_NOT_SHARED"}
     if income:
         monthly = income["monthly_income"]
         amounts = [f"{p['month']}: {p['net_amount_minor'] / 100:,.2f}" for p in monthly["periods"]]
@@ -83,8 +87,9 @@ if decide:
         print(f"lowest month: {min(p['net_amount_minor'] for p in monthly['periods']) / 100:,.2f}"
               f"  income CNP: {mask(income.get('subject', {}).get('personal_numeric_code'))}")
         linked, note = link_income(pid, income, time.time())
-    print("linker:", note)
+    print("linker:", note["code"])
     decision = recommend(pid, linked, date.today())
     print("decision:", decision["recommended"] or decision["status"], "| eligible:", decision["eligible"])
+    print("reasons:", [r["code"] for r in decision["reasons"]])
     for name, item in decision.get("insurance", {}).items():
-        print(f"  {name} insurance: {item['reason']}")
+        print(f"  {name} insurance: {item['code']}")

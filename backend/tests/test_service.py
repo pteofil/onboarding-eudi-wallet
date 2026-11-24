@@ -157,7 +157,9 @@ def test_income_of_someone_else_is_ignored(keys):
     review = svc.review(app_id)
     assert review["incomeShared"] is False
     income_check = review["trust"]["checks"][-1]
-    assert income_check["result"] == "failed" and "someone else" in income_check["detail"]
+    assert income_check["result"] == "failed" and "match" in income_check["detail"]
+    codes = [r["code"] for r in review["decision"]["reasons"]]
+    assert "INCOME_NOT_LINKED" in codes and "INCOME_NOT_SHARED" not in codes
 
 
 def test_confirm_only_eligible_package(keys):

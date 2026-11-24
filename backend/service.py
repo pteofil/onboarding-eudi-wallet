@@ -148,16 +148,18 @@ class OnboardingService:
         pid, address, income = split_credentials(payload.get("credentials", []))
         if not pid or not pid.get("birth_date") or not address:
             return self._finish(app, "MISSING_IDENTITY", "pid_or_address_missing")
-        linked_income, income_note = (None, "income not shared")
+        linked_income, income_note = None, None
         if income:
             linked_income, income_note = self.link_income(pid, income, self.clock())
         decision = self.recommend(pid, linked_income, self.today())
         if income and not linked_income:
-            decision.setdefault("reasons", []).append(income_note)
+            # Say why the shared income wasn't used instead of "you didn't share it".
+            decision["reasons"] = [r for r in decision.get("reasons", [])
+                                   if r.get("code") != "INCOME_NOT_SHARED"] + [income_note]
         app["decision"] = decision
         app["trust"] = trust.build_report(
             [c.get("type") for c in payload.get("credentials", [])], income is not None,
-            linked_income is not None, income_note, self.clock(), stub=app["transactionId"].startswith("stub-"))
+            linked_income is not None, (income_note or {}).get("text"), self.clock(), stub=app["transactionId"].startswith("stub-"))
         app["display"] = {
             "identity": {k: pid.get(k) for k in ("given_name", "family_name", "birth_date")},
             "personalNumericCode": mask(pid.get("personal_numeric_code")),

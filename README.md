@@ -38,7 +38,13 @@ transaction binding, one-time use, outcome, identity and address present) or `ve
 by the Tremend verifier before it signs). `result` is `passed`, `failed` and `not_shared` (income only), or `skipped` (stub, with a `note`).
 A review exists only when every backend check passed, so only the income line can fail. No claim values in it.
 
-Package rules (`rules.py`), set with env vars: `STARTER_MAX_AGE` (25), `PLUS_MIN_MONTHLY_RON` (5000), `PREMIUM_MIN_MONTHLY_RON` (10000), `TRAVEL_INSURANCE_MAX_AGE` (70), `LIFE_INSURANCE_MAX_AGE` (80). Income is the lowest of the six monthly net amounts. To check a scenario with the real wallet: `python3 try_verification.py onboard-full --decide`.
+Package rules (`rules.py`), set with env vars: `STARTER_MAX_AGE` (25), `PLUS_MIN_MONTHLY_RON` (5000), `PREMIUM_MIN_MONTHLY_RON` (10000), `TRAVEL_INSURANCE_MAX_AGE` (70), `LIFE_INSURANCE_MAX_AGE` (80). Income is the lowest of the six monthly net amounts.
+`decision.reasons[]`, `notEligible[]`, `insurance.*` and `assumptions[]` carry a `code` and an English `text`, plus `age` (int) or
+`amount` (e.g. `"16,000"`) when the text has a placeholder. The app shows its own string `reason_<code in lower case>` from
+`res/values/strings.xml` (e.g. `INCOME_PREMIUM` -> `reason_income_premium`, `TRAVEL_INS_AGE` -> `reason_travel_ins_age`;
+assumptions -> `assumption_<code>`). Codes: `AGE_ADULT`, `AGE_UNDER_18`, `STARTER_AGE`, `STARTER_TOO_OLD`, `NEEDS_PLUS`,
+`NEEDS_PREMIUM`, `INCOME_PLUS`, `INCOME_PREMIUM`, `LOWEST_MONTH`, `INCOME_NOT_SHARED`, `INCOME_NOT_LINKED`,
+`INCOME_UNUSABLE`, `TRAVEL_INS_OK`, `TRAVEL_INS_AGE`, `LIFE_INS_OK`, `LIFE_INS_AGE`; assumptions `FICTIONAL`, `INCOME`, `INSURANCE`. To check a scenario with the real wallet: `python3 try_verification.py onboard-full --decide`.
 
 Deploy (arm64, Python 3.12, handler `handler.lambda_handler`, Function URL):
 ```
