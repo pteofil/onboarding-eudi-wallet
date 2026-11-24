@@ -1,0 +1,37 @@
+package ro.banking40.team01.onboarding
+
+/** Everything that ends the wallet step without an account. One reusable error screen per kind. */
+enum class ErrorKind(val canRetry: Boolean, val offersForm: Boolean) {
+    DECLINED(canRetry = true, offersForm = true),
+    EXPIRED(canRetry = true, offersForm = false),
+    WALLET_ERROR(canRetry = true, offersForm = false),
+    NOT_VERIFIED(canRetry = true, offersForm = false),
+    MISSING_IDENTITY(canRetry = true, offersForm = true),
+    UNDER_18(canRetry = false, offersForm = false),
+
+    // App-side, not backend statuses.
+    NO_WALLET(canRetry = true, offersForm = false),
+    TECHNICAL(canRetry = true, offersForm = false),
+}
+
+/** What the app does with a backend `status`. The app never decides on its own: it follows this. */
+sealed interface StatusOutcome {
+    data object KeepPolling : StatusOutcome
+    data object Verified : StatusOutcome
+    data object Confirmed : StatusOutcome
+    data class Failed(val kind: ErrorKind) : StatusOutcome
+}
+
+fun outcomeOf(status: String): StatusOutcome = when (status) {
+    "PENDING" -> StatusOutcome.KeepPolling
+    "VERIFIED" -> StatusOutcome.Verified
+    "CONFIRMED" -> StatusOutcome.Confirmed
+    "DECLINED" -> StatusOutcome.Failed(ErrorKind.DECLINED)
+    "EXPIRED" -> StatusOutcome.Failed(ErrorKind.EXPIRED)
+    "WALLET_ERROR" -> StatusOutcome.Failed(ErrorKind.WALLET_ERROR)
+    "NOT_VERIFIED" -> StatusOutcome.Failed(ErrorKind.NOT_VERIFIED)
+    "UNDER_18" -> StatusOutcome.Failed(ErrorKind.UNDER_18)
+    "MISSING_IDENTITY" -> StatusOutcome.Failed(ErrorKind.MISSING_IDENTITY)
+    // An unknown status is never treated as success.
+    else -> StatusOutcome.Failed(ErrorKind.NOT_VERIFIED)
+}
