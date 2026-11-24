@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- All customer-facing copy lives here. Bogdan sends the final texts. -->
+<resources>
+    <string name="app_name">VerifiedStart</string>
+    <string name="bank_name">Aurora Bank</string>
+
+    <!-- 1 Become a client -->
+    <string name="start_title">Become a client</string>
+    <string name="start_body">Open your current account in minutes. Share your verified identity and address from your EUDI Wallet instead of typing them and uploading documents.</string>
+    <string name="start_continue_wallet">Continue with EUDI Wallet</string>
+    <string name="start_fill_form">Fill in the form</string>
+    <string name="form_not_available">The form is not available in this demo. Please continue with your EUDI Wallet.</string>
+
+    <!-- 3 Wallet hand-off -->
+    <string name="handoff_title">Opening your EUDI Wallet…</string>
+    <string name="handoff_body">Check who is asking and which details, then tap Share in your wallet. You will come back here automatically.</string>
+    <string name="handoff_not_opened">Didn\'t share, or nothing happened?</string>
+
+    <!-- 4 Verifying -->
+    <string name="verifying_title">Verifying your details…</string>
+    <string name="verifying_body">We are checking that your documents are genuine and valid. This takes a few seconds.</string>
+
+    <!-- 8 Welcome -->
+    <string name="welcome_title">Welcome to %1$s!</string>
+    <string name="welcome_body">Your account is open.</string>
+    <string name="welcome_package">Package</string>
+    <string name="welcome_iban">IBAN</string>
+    <string name="welcome_reference">Reference</string>
+    <string name="welcome_already_confirmed">This application has already been confirmed.</string>
+    <string name="welcome_done">Done</string>
+
+    <!-- Shared actions -->
+    <string name="action_try_again">Try again</string>
+    <string name="action_fill_form">Fill in the form</string>
+    <string name="action_back_to_start">Back to start</string>
+
+    <!-- Error states -->
+    <string name="error_declined_title">Nothing was shared</string>
+    <string name="error_declined_body">No problem, nothing was shared.</string>
+    <string name="error_expired_title">Request expired</string>
+    <string name="error_expired_body">The request timed out.</string>
+    <string name="error_wallet_title">Wallet problem</string>
+    <string name="error_wallet_body">Your wallet couldn\'t complete the request.</string>
+    <string name="error_not_verified_title">Verification failed</string>
+    <string name="error_not_verified_body">We couldn\'t verify the data.</string>
+    <string name="error_missing_identity_title">Details missing</string>
+    <string name="error_missing_identity_body">We need your identity and address to open an account.</string>
+    <string name="error_under_18_title">You need to be 18</string>
+    <string name="error_under_18_body">You need to be 18 to open an account on your own. A parent or guardian can open an account for minors with you at any of our branches.</string>
+    <string name="error_no_wallet_title">EUDI Wallet not found</string>
+    <string name="error_no_wallet_body">Install the EUDI Wallet on this phone, then try again.</string>
+    <string name="error_technical_title">Something went wrong</string>
+    <string name="error_technical_body">We couldn\'t reach the bank. Check your connection and try again.</string>
+</resources>

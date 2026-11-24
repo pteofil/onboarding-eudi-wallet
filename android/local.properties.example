@@ -1,0 +1,19 @@
+# Copy to local.properties (git-ignored) and fill in. Never commit the real file.
+# Android Studio writes sdk.dir for you.
+sdk.dir=/Users/<you>/Library/Android/sdk
+
+# Backend: the hosted Lambda (default), or a local server through `adb reverse tcp:8081 tcp:8081`
+# with backendBaseUrl=http://localhost:8081
+backendBaseUrl=https://okrzzubfh3hlh4wgjc5vbjc5ym0chayk.lambda-url.eu-central-1.on.aws
+
+# true (default): the wallet hands back to the app after approval. false: the user switches back.
+returnToApp=true
+# true: use the backend's stub verifier, no wallet needed (backend needs ALLOW_STUB=1). Default false.
+stub=false
+
+# team-debug.p12 from the team ZIP (android-sdk/). Keep it OUTSIDE the repo.
+# Values for the password and alias are in android-sdk/README.md of the team ZIP.
+teamDebug.storeFile=/absolute/path/outside/repo/team-debug.p12
+teamDebug.storePassword=
+teamDebug.keyAlias=androiddebugkey
+teamDebug.keyPassword=
