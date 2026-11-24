@@ -36,6 +36,9 @@ import kotlin.time.Duration.Companion.minutes
 sealed interface Screen {
     data object Landing : Screen // animated intro
     data object Start : Screen // 1 Become a client
+    data object FormDetails : Screen // manual form 1/2 (demo only)
+    data object FormAddress : Screen // manual form 2/2 (demo only)
+    data object FormSubmitted : Screen
     data object Consent : Screen // 2 Consent
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
@@ -47,11 +50,12 @@ sealed interface Screen {
 }
 
 /** Short messages for actions the demo shows but doesn't implement. */
-enum class Notice { FORM, NOT_IN_DEMO }
+enum class Notice { NOT_IN_DEMO }
 
 data class UiState(
     val screen: Screen = Screen.Start,
     val notice: Notice? = null,
+    val form: ManualForm = ManualForm(),
     /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
     val shareIncome: Boolean = false,
     /** GET /review, loaded once the backend says VERIFIED. */
@@ -96,6 +100,14 @@ class OnboardingViewModel(
 
     fun openConsent() = show(Screen.Consent)
 
+    fun openForm() = show(Screen.FormDetails)
+
+    fun updateForm(form: ManualForm) = _state.update { it.copy(form = form) }
+
+    fun formNext() = show(Screen.FormAddress)
+
+    fun submitForm() = show(Screen.FormSubmitted)
+
     fun setShareIncome(share: Boolean) = _state.update { it.copy(shareIncome = share) }
 
     fun continueWithWallet() {
@@ -115,7 +127,8 @@ class OnboardingViewModel(
 
     /** System back: one step back where that makes sense, otherwise abandon the application. */
     fun back() = when (_state.value.screen) {
-        Screen.Consent -> show(Screen.Start)
+        Screen.Consent, Screen.FormDetails, Screen.FormSubmitted -> show(Screen.Start)
+        Screen.FormAddress -> show(Screen.FormDetails)
         Screen.Package -> show(Screen.Review)
         Screen.Confirm -> if (!_state.value.signing) show(Screen.Package) else Unit
         else -> reset()

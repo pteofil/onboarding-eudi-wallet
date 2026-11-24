@@ -14,7 +14,33 @@
     <string name="start_body">Open your current account in minutes. Share your verified identity and address from your EUDI Wallet instead of typing them and uploading documents.</string>
     <string name="start_continue_wallet">Continue with EUDI Wallet</string>
     <string name="start_fill_form">Fill in the form</string>
-    <string name="form_not_available">The form is not available in this demo. Please continue with your EUDI Wallet.</string>
+
+    <!-- Manual form (demo only, prefilled, nothing is sent) -->
+    <string name="form_step">Step %1$d of %2$d</string>
+    <string name="form_prefilled_note">Demo: we\'ve filled this in for you. Without a wallet, every field is typed by hand and checked by a colleague.</string>
+    <string name="form_details_title">Your details</string>
+    <string name="form_first_name">First name</string>
+    <string name="form_last_name">Last name</string>
+    <string name="form_birth_date">Date of birth (DD.MM.YYYY)</string>
+    <string name="form_cnp">Personal identification number (CNP)</string>
+    <string name="form_id_document">ID card series and number</string>
+    <string name="form_id_photo">Photo of your ID card</string>
+    <string name="form_id_photo_file">id_card_front.jpg · uploaded (demo)</string>
+    <string name="form_next">Next</string>
+    <string name="form_address_title">Address and income</string>
+    <string name="form_street">Street and number</string>
+    <string name="form_city">City</string>
+    <string name="form_postal_code">Postal code</string>
+    <string name="form_county">County</string>
+    <string name="form_employer">Employer</string>
+    <string name="form_income">Net monthly income (RON)</string>
+    <string name="form_payslips">Payslips for the last six months</string>
+    <string name="form_payslips_file">payslips_6_months.pdf · uploaded (demo)</string>
+    <string name="form_submit">Submit application</string>
+    <string name="form_submitted_title">Application received</string>
+    <string name="form_submitted_body">Because these details aren\'t verified, a colleague will check your documents by hand. This usually takes 2–3 working days, and we may ask you to visit a branch.</string>
+    <string name="form_submitted_wallet_pitch">With your EUDI Wallet your account is open in minutes: your details are already verified, so there\'s nothing to type or upload.</string>
+    <string name="form_back_to_start">Back to start</string>
 
     <!-- 2 Consent: the app's own strings; final copy is in the block from Dana below -->
     <string name="consent_continue">Open my EUDI Wallet</string>

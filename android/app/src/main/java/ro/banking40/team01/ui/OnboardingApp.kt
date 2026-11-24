@@ -28,7 +28,6 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val noticeText = when (state.notice) {
-        Notice.FORM -> stringResource(R.string.form_not_available)
         Notice.NOT_IN_DEMO -> stringResource(R.string.not_in_demo)
         null -> null
     }
@@ -54,7 +53,13 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                 Screen.Landing -> LandingScreen(onGetStarted = viewModel::getStarted)
                 Screen.Start -> StartScreen(
                     onContinue = viewModel::openConsent,
-                    onFillForm = { viewModel.showNotice(Notice.FORM) },
+                    onFillForm = viewModel::openForm,
+                )
+                Screen.FormDetails -> FormDetailsScreen(state.form, viewModel::updateForm, viewModel::formNext)
+                Screen.FormAddress -> FormAddressScreen(state.form, viewModel::updateForm, viewModel::submitForm)
+                Screen.FormSubmitted -> FormSubmittedScreen(
+                    onUseWallet = viewModel::openConsent,
+                    onBackToStart = viewModel::reset,
                 )
                 Screen.Consent -> ConsentScreen(
                     shareIncome = state.shareIncome,
