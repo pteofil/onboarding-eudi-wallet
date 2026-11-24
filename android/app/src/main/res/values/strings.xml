@@ -173,6 +173,7 @@
     <string name="reason_needs_premium">Premium needs a net income of at least 10,000 RON a month.</string>
     <string name="reason_income_not_shared">You didn\'t share your income, so we\'ve shown packages that don\'t need it.</string>
     <string name="reason_income_not_linked">We couldn\'t match your income document to your identity, so we didn\'t use it.</string>
+    <string name="reason_income_not_received">You chose to share your income, but your wallet didn\'t send it, so we\'ve shown packages that don\'t need it.</string>
     <string name="reason_travel_ins_ok">Travel insurance is included (available up to age 70).</string>
     <string name="reason_travel_ins_age">Travel insurance isn\'t available at your age (up to age 70).</string>
     <string name="reason_life_ins_ok">Life insurance is included (available up to age 80).</string>
