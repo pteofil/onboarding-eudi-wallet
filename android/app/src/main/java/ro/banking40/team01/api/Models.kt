@@ -2,6 +2,7 @@ package ro.banking40.team01.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
 @Serializable
@@ -39,6 +40,28 @@ data class ReviewResponse(
     val incomeShared: Boolean = false,
     val withheld: List<String> = emptyList(),
     val decision: Decision,
+    val trust: TrustReport? = null,
+    /** True when the backend's stub verifier produced this data: show a TEST DATA marker. */
+    val stub: Boolean = false,
+)
+
+/** What the backend checked before using the wallet data. Labels only, no claim values. */
+@Serializable
+data class TrustReport(
+    val checkedAt: String? = null,
+    val credentials: List<String> = emptyList(),
+    val checks: List<TrustCheck> = emptyList(),
+    val note: String? = null,
+)
+
+@Serializable
+data class TrustCheck(
+    val id: String,
+    val label: String,
+    val by: String? = null,
+    /** passed, failed, skipped or not_shared. */
+    val result: String,
+    val detail: String? = null,
 )
 
 @Serializable
@@ -46,6 +69,8 @@ data class Identity(
     @SerialName("given_name") val givenName: String? = null,
     @SerialName("family_name") val familyName: String? = null,
     @SerialName("birth_date") val birthDate: String? = null,
+    /** Only when the wallet shares it; a string or a list depending on the credential. */
+    val nationality: JsonElement? = null,
 )
 
 @Serializable
@@ -54,16 +79,45 @@ data class Decision(
     val recommended: String? = null,
     val eligible: List<String> = emptyList(),
     val notEligible: List<NotEligible> = emptyList(),
-    val insurance: JsonObject = JsonObject(emptyMap()),
-    val reasons: List<String> = emptyList(),
-    val assumptions: List<String> = emptyList(),
+    /** Keyed by line (travel, life); only sent when Premium is recommended. */
+    val insurance: Map<String, InsuranceLine> = emptyMap(),
+    val reasons: List<Reason> = emptyList(),
+    val assumptions: List<Reason> = emptyList(),
 )
+
+/**
+ * A backend reason: the app shows its own string named after [code] (e.g. `reason_income_premium`) when it has one,
+ * otherwise the English [text]. [age] or [amount] fill the string's placeholder.
+ */
+@Serializable
+data class Reason(
+    val code: String? = null,
+    val text: String = "",
+    val age: Int? = null,
+    val amount: String? = null,
+)
+
+@Serializable
+data class InsuranceLine(
+    val available: Boolean = false,
+    val code: String? = null,
+    val text: String = "",
+    val age: Int? = null,
+    val amount: String? = null,
+) {
+    val reason: Reason get() = Reason(code, text, age, amount)
+}
 
 @Serializable
 data class NotEligible(
     @SerialName("package") val packageName: String,
-    val reason: String? = null,
-)
+    val code: String? = null,
+    val text: String = "",
+    val age: Int? = null,
+    val amount: String? = null,
+) {
+    val reason: Reason get() = Reason(code, text, age, amount)
+}
 
 /** `packageName = null` is sent as `{}`: the backend then confirms its recommended package. */
 @Serializable

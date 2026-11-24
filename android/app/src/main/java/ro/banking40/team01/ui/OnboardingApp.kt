@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ro.banking40.team01.R
+import ro.banking40.team01.onboarding.Notice
 import ro.banking40.team01.onboarding.OnboardingViewModel
 import ro.banking40.team01.onboarding.Screen
 
@@ -22,31 +23,69 @@ import ro.banking40.team01.onboarding.Screen
 fun OnboardingApp(viewModel: OnboardingViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    val formNotice = stringResource(R.string.form_not_available)
+    val noticeText = when (state.notice) {
+        Notice.FORM -> stringResource(R.string.form_not_available)
+        Notice.NOT_IN_DEMO -> stringResource(R.string.not_in_demo)
+        null -> null
+    }
 
-    LaunchedEffect(state.showFormNotice) {
-        if (state.showFormNotice) {
-            snackbar.showSnackbar(formNotice)
-            viewModel.dismissFormNotice()
+    LaunchedEffect(state.notice) {
+        if (noticeText != null) {
+            snackbar.showSnackbar(noticeText)
+            viewModel.dismissNotice()
         }
     }
-    BackHandler(enabled = state.screen != Screen.Start) { viewModel.reset() }
+    BackHandler(enabled = state.screen != Screen.Start) { viewModel.back() }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (val screen = state.screen) {
                 Screen.Start -> StartScreen(
-                    onContinue = { viewModel.continueWithWallet() },
-                    onFillForm = viewModel::showFormNotice,
+                    onContinue = viewModel::openConsent,
+                    onFillForm = { viewModel.showNotice(Notice.FORM) },
+                )
+                Screen.Consent -> ConsentScreen(
+                    shareIncome = state.shareIncome,
+                    onShareIncomeChange = viewModel::setShareIncome,
+                    onContinue = viewModel::continueWithWallet,
                 )
                 Screen.Handoff -> HandoffScreen(onTryAgain = viewModel::tryAgain)
                 Screen.Verifying -> VerifyingScreen()
+                Screen.Review -> state.review?.let { review ->
+                    ReviewScreen(
+                        review = review,
+                        contact = state.contact,
+                        onPhoneChange = viewModel::onPhoneChange,
+                        onEmailChange = viewModel::onEmailChange,
+                        onSendOtp = viewModel::sendOtp,
+                        onOtpChange = viewModel::onOtpChange,
+                        onContinue = viewModel::continueFromReview,
+                    )
+                }
+                Screen.Package -> state.review?.let { review ->
+                    PackageScreen(
+                        decision = review.decision,
+                        selected = state.selectedPackage,
+                        onSelect = viewModel::selectPackage,
+                        onContinue = viewModel::continueFromPackage,
+                    )
+                }
+                Screen.Confirm -> state.selectedPackage?.let { selected ->
+                    ConfirmScreen(
+                        packageName = selected,
+                        contact = state.contact,
+                        termsAccepted = state.termsAccepted,
+                        signing = state.signing,
+                        onTermsChange = viewModel::setTermsAccepted,
+                        onSign = viewModel::sign,
+                    )
+                }
                 is Screen.Welcome -> WelcomeScreen(screen.confirmation, onDone = viewModel::reset)
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,
                     onTryAgain = viewModel::tryAgain,
-                    onFillForm = viewModel::showFormNotice,
-                    onBackToStart = viewModel::reset,
+                    onMinors = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
+                    onHelp = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
                 )
             }
         }

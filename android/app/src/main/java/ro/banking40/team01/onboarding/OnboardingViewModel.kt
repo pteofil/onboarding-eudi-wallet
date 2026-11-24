@@ -26,6 +26,7 @@ import ro.banking40.team01.api.ConfirmRequest
 import ro.banking40.team01.api.ConfirmResponse
 import ro.banking40.team01.api.CreateApplicationRequest
 import ro.banking40.team01.api.OnboardingApi
+import ro.banking40.team01.api.ReviewResponse
 import ro.banking40.team01.api.backendErrorCode
 import ro.banking40.team01.wallet.WalletReturn
 import kotlin.time.Duration.Companion.milliseconds
@@ -34,15 +35,32 @@ import kotlin.time.Duration.Companion.minutes
 /** Numbers match the journey's screen list; 2, 5, 6 and 7 come after lunch. */
 sealed interface Screen {
     data object Start : Screen // 1 Become a client
+    data object Consent : Screen // 2 Consent
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
+    data object Review : Screen // 5 Review your details
+    data object Package : Screen // 6 Your package
+    data object Confirm : Screen // 7 Confirm
     data class Welcome(val confirmation: ConfirmResponse?) : Screen // 8 Welcome
     data class Error(val kind: ErrorKind) : Screen
 }
 
+/** Short messages for actions the demo shows but doesn't implement. */
+enum class Notice { FORM, NOT_IN_DEMO }
+
 data class UiState(
     val screen: Screen = Screen.Start,
-    val showFormNotice: Boolean = false,
+    val notice: Notice? = null,
+    /** The consent screen's income switch; sent as `shareIncome` in POST /applications. */
+    val shareIncome: Boolean = false,
+    /** GET /review, loaded once the backend says VERIFIED. */
+    val review: ReviewResponse? = null,
+    val contact: Contact = Contact(),
+    /** Starts as the backend's recommendation; the customer may pick another eligible package. */
+    val selectedPackage: String? = null,
+    val termsAccepted: Boolean = false,
+    /** True while the simulated signature and POST /confirm run. */
+    val signing: Boolean = false,
 )
 
 class OnboardingViewModel(
@@ -54,7 +72,7 @@ class OnboardingViewModel(
     private var applicationId: String?
         get() = saved[KEY_APPLICATION_ID]
         set(value) = saved.set(KEY_APPLICATION_ID, value)
-    private var shareIncome: Boolean
+    private var savedShareIncome: Boolean
         get() = saved[KEY_SHARE_INCOME] ?: false
         set(value) = saved.set(KEY_SHARE_INCOME, value)
     private var lastResponseCode: String?
@@ -62,7 +80,7 @@ class OnboardingViewModel(
         set(value) = saved.set(KEY_LAST_RESPONSE_CODE, value)
 
     private val _state = MutableStateFlow(
-        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Start),
+        UiState(screen = if (applicationId != null) Screen.Handoff else Screen.Start, shareIncome = savedShareIncome),
     )
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -73,8 +91,12 @@ class OnboardingViewModel(
 
     private var job: Job? = null
 
-    fun continueWithWallet(shareIncome: Boolean = false) {
-        this.shareIncome = shareIncome
+    fun openConsent() = show(Screen.Consent)
+
+    fun setShareIncome(share: Boolean) = _state.update { it.copy(shareIncome = share) }
+
+    fun continueWithWallet() {
+        savedShareIncome = _state.value.shareIncome
         startApplication()
     }
 
@@ -85,12 +107,60 @@ class OnboardingViewModel(
         job?.cancel()
         applicationId = null
         lastResponseCode = null
-        show(Screen.Start)
+        _state.update { UiState(shareIncome = it.shareIncome) }
     }
 
-    fun showFormNotice() = _state.update { it.copy(showFormNotice = true) }
+    /** System back: one step back where that makes sense, otherwise abandon the application. */
+    fun back() = when (_state.value.screen) {
+        Screen.Consent -> show(Screen.Start)
+        Screen.Package -> show(Screen.Review)
+        Screen.Confirm -> if (!_state.value.signing) show(Screen.Package) else Unit
+        else -> reset()
+    }
 
-    fun dismissFormNotice() = _state.update { it.copy(showFormNotice = false) }
+    /** A new number needs a new code. */
+    fun onPhoneChange(phone: String) =
+        updateContact { if (phone == it.phone) it else it.copy(phone = phone, otpSent = false, otp = "") }
+
+    fun onEmailChange(email: String) = updateContact { it.copy(email = email.trim()) }
+
+    fun sendOtp() = updateContact { it.copy(otpSent = true, otp = "") }
+
+    fun onOtpChange(otp: String) =
+        updateContact { it.copy(otp = otp.filter(Char::isDigit).take(Contact.OTP_LENGTH)) }
+
+    fun continueFromReview() {
+        if (_state.value.contact.complete) show(Screen.Package)
+    }
+
+    /** Only packages the backend listed as eligible can be picked. */
+    fun selectPackage(name: String) = _state.update {
+        if (it.review?.decision?.eligible?.contains(name) == true) it.copy(selectedPackage = name) else it
+    }
+
+    fun continueFromPackage() {
+        if (_state.value.selectedPackage != null) show(Screen.Confirm)
+    }
+
+    fun setTermsAccepted(accepted: Boolean) = _state.update { it.copy(termsAccepted = accepted) }
+
+    /** Signing is simulated (no real SCA); then the backend opens the account. */
+    fun sign() {
+        val id = applicationId ?: return
+        val state = _state.value
+        val selected = state.selectedPackage ?: return
+        if (!state.termsAccepted || state.signing) return
+        job?.cancel()
+        _state.update { it.copy(signing = true) }
+        job = viewModelScope.launch {
+            delay(SIMULATED_SIGNING)
+            confirm(id, selected)
+        }
+    }
+
+    fun showNotice(notice: Notice) = _state.update { it.copy(notice = notice) }
+
+    fun dismissNotice() = _state.update { it.copy(notice = null) }
 
     fun onWalletNotFound() = show(Screen.Error(ErrorKind.NO_WALLET))
 
@@ -137,12 +207,12 @@ class OnboardingViewModel(
         job?.cancel()
         applicationId = null
         lastResponseCode = null
-        show(Screen.Handoff)
+        _state.update { UiState(screen = Screen.Handoff, shareIncome = it.shareIncome) }
         job = viewModelScope.launch {
             try {
                 val created = api.create(
                     CreateApplicationRequest(
-                        shareIncome = shareIncome,
+                        shareIncome = savedShareIncome,
                         returnToApp = BuildConfig.RETURN_TO_APP,
                         stub = BuildConfig.USE_STUB_VERIFIER,
                     ),
@@ -184,8 +254,7 @@ class OnboardingViewModel(
     private suspend fun handle(id: String, status: String): Boolean {
         when (val outcome = outcomeOf(status)) {
             StatusOutcome.KeepPolling -> return false
-            // Temporary 4 -> 8 shortcut until Review/Package/Confirm (5-7) exist.
-            StatusOutcome.Verified -> confirmRecommended(id)
+            StatusOutcome.Verified -> loadReview(id)
             StatusOutcome.Confirmed -> show(Screen.Welcome(confirmation = null))
             is StatusOutcome.Failed -> show(Screen.Error(outcome.kind))
         }
@@ -193,9 +262,25 @@ class OnboardingViewModel(
         return true
     }
 
-    private suspend fun confirmRecommended(id: String) {
+    private suspend fun loadReview(id: String) {
+        show(Screen.Verifying)
         try {
-            show(Screen.Welcome(api.confirm(id, ConfirmRequest())))
+            val review = api.review(id)
+            _state.update {
+                it.copy(review = review, selectedPackage = review.decision.recommended, screen = Screen.Review)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            fail("Review", e)
+        }
+    }
+
+    private suspend fun confirm(id: String, packageName: String) {
+        try {
+            val confirmation = api.confirm(id, ConfirmRequest(packageName))
+            // The verified details are no longer needed once the account is opened.
+            _state.update { UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -205,13 +290,16 @@ class OnboardingViewModel(
 
     private fun fail(step: String, e: Exception) {
         Log.w(TAG, "$step failed: ${e.describe()}")
-        show(Screen.Error(ErrorKind.TECHNICAL))
+        _state.update { it.copy(screen = Screen.Error(ErrorKind.TECHNICAL), signing = false) }
     }
+
+    private fun updateContact(change: (Contact) -> Contact) =
+        _state.update { it.copy(contact = change(it.contact)) }
 
     private fun show(screen: Screen) = _state.update { it.copy(screen = screen) }
 
     private fun Exception.describe(): String =
-        (this as? HttpException)?.let { "HTTP ${it.code()} ${it.backendErrorCode()}" } ?: javaClass.simpleName
+        (this as? HttpException)?.let { "HTTP ${it.code()} ${it.backendErrorCode()}" } ?: "${javaClass.simpleName}: ${message?.lineSequence()?.first()}"
 
     companion object {
         private const val TAG = "VerifiedStart"
@@ -220,6 +308,7 @@ class OnboardingViewModel(
         private const val KEY_LAST_RESPONSE_CODE = "lastResponseCode"
         private val POLL_INTERVAL = 1500.milliseconds
         private val POLL_TIMEOUT = 3.minutes
+        private val SIMULATED_SIGNING = 1200.milliseconds
 
         val Factory = viewModelFactory {
             initializer {

@@ -24,7 +24,7 @@ fun HandoffScreen(onTryAgain: () -> Unit) {
         Spinner()
         Text(stringResource(R.string.handoff_not_opened), style = MaterialTheme.typography.bodyMedium)
         OutlinedButton(onClick = onTryAgain, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.action_try_again))
+            Text(stringResource(R.string.btn_try_again))
         }
     }
 }

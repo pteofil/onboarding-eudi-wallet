@@ -17,6 +17,7 @@ fun StartScreen(onContinue: () -> Unit, onFillForm: () -> Unit) {
     StepLayout(
         title = stringResource(R.string.start_title),
         body = stringResource(R.string.start_body),
+        eyebrow = stringResource(R.string.solution_name),
     ) {
         Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.start_continue_wallet))
