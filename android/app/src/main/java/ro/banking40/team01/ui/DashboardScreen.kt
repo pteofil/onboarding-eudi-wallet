@@ -313,7 +313,6 @@ private fun Activity() {
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 }
-                Text(stringResource(R.string.dashboard_balance), style = MaterialTheme.typography.bodyMedium)
             }
             Text(
                 stringResource(R.string.dashboard_activity_empty),
