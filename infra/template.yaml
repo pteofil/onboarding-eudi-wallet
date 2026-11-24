@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: "2010-09-09"
+# Stack rbro-verifiedstart-import-stack (eu-central-1), made by importing the existing Lambda and table.
+# Account-specific values are parameters so this file can live in a public repo.
+# Not in the stack: the Lambda execution role and the Lambda function URL (both created in the console).
+Description: VerifiedStart hackathon API - imported existing resources
+
+Parameters:
+  LambdaRoleArn:
+    Type: String
+  VerifierBaseUrl:
+    Type: String
+  VerifierAudience:
+    Type: String
+  VerifierWebsiteKey:
+    Type: String
+    NoEcho: true
+  VerifierWebsiteSecret:
+    Type: String
+    NoEcho: true
+  ResultPrivateKeyB64:
+    Type: String
+    NoEcho: true
+
+Resources:
+  VerifiedStartLambda:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FunctionName: rbro-verifiedstart-api-hackathon-lambda
+      Role: !Ref LambdaRoleArn
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Architectures: [arm64]
+      MemorySize: 256
+      Timeout: 30
+      EphemeralStorage:
+        Size: 512
+      TracingConfig:
+        Mode: PassThrough
+      LoggingConfig:
+        LogFormat: Text
+        LogGroup: /aws/lambda/rbro-verifiedstart-api-hackathon-lambda
+      # Code is deployed by backend/deploy.py, not by CloudFormation. Don't change this property:
+      # a stack update that touches it would replace the real code with the placeholder.
+      Code:
+        ZipFile: "# placeholder - real code deployed outside CloudFormation"
+      Environment:
+        Variables:
+          PROFILE_BASIC: onboard-basic
+          PROFILE_FULL: onboard-full
+          TABLE_NAME: verifiedstart-applications
+          USE_DYNAMO: "1"
+          ALLOW_STUB: "1"
+          VERIFIER_RETURN_URI: "ro.banking40.team01://same-device"
+          VERIFIER_BASE_URL: !Ref VerifierBaseUrl
+          VERIFIER_AUDIENCE: !Ref VerifierAudience
+          VERIFIER_WEBSITE_KEY: !Ref VerifierWebsiteKey
+          VERIFIER_WEBSITE_SECRET: !Ref VerifierWebsiteSecret
+          RESULT_PRIVATE_KEY_B64: !Ref ResultPrivateKeyB64
+
+  VerifiedStartTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: verifiedstart-applications
+      BillingMode: PAY_PER_REQUEST
+      TableClass: STANDARD
+      DeletionProtectionEnabled: false
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false

@@ -7,7 +7,7 @@ and (optionally) income from the wallet; nothing is typed. Banking 4.0 EUDI Wall
 - `android/` - Kotlin + Jetpack Compose app (`ro.banking40.team01`)
 - `backend/` - Python 3.12 AWS Lambda (Function URL) that talks to the Tremend Verifier,
   opens and validates the sealed result, and recommends a package (Simple / Starter / Plus / Premium)
-- `infra/` - AWS SAM template
+- `infra/` - CloudFormation template for the Lambda and the DynamoDB table (code is deployed by `backend/deploy.py`)
 
 ## Backend
 ```
@@ -44,7 +44,9 @@ Package rules (`rules.py`), set with env vars: `STARTER_MAX_AGE` (25), `PLUS_MIN
 `res/values/strings.xml` (e.g. `INCOME_PREMIUM` -> `reason_income_premium`, `TRAVEL_INS_AGE` -> `reason_travel_ins_age`;
 assumptions -> `assumption_<code>`). Codes: `AGE_ADULT`, `AGE_UNDER_18`, `STARTER_AGE`, `STARTER_TOO_OLD`, `NEEDS_PLUS`,
 `NEEDS_PREMIUM`, `INCOME_PLUS`, `INCOME_PREMIUM`, `LOWEST_MONTH`, `INCOME_NOT_SHARED`, `INCOME_NOT_LINKED`,
-`INCOME_UNUSABLE`, `TRAVEL_INS_OK`, `TRAVEL_INS_AGE`, `LIFE_INS_OK`, `LIFE_INS_AGE`; assumptions `FICTIONAL`, `INCOME`, `INSURANCE`. To check a scenario with the real wallet: `python3 try_verification.py onboard-full --decide`.
+`INCOME_UNUSABLE`, `INCOME_NOT_RECEIVED`, `TRAVEL_INS_OK`, `TRAVEL_INS_AGE`, `LIFE_INS_OK`, `LIFE_INS_AGE`; assumptions `FICTIONAL`, `INCOME`, `INSURANCE`. To check a scenario with the real wallet: `python3 try_verification.py onboard-full --decide`.
+Income is optional in the `onboard-full` profile. The wallet leaves out an income document that has expired, and never
+says why, so a missing income gives `INCOME_NOT_RECEIVED` and Simple or Starter.
 
 Deploy (arm64, Python 3.12, handler `handler.lambda_handler`, Function URL):
 ```

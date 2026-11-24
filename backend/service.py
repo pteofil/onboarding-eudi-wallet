@@ -12,6 +12,7 @@ from datetime import date
 from typing import Callable, Optional
 
 import trust
+from rules import reason
 from validator import ResultRejected
 from verifier_client import VerifierError
 
@@ -156,6 +157,12 @@ class OnboardingService:
             # Say why the shared income wasn't used instead of "you didn't share it".
             decision["reasons"] = [r for r in decision.get("reasons", [])
                                    if r.get("code") != "INCOME_NOT_SHARED"] + [income_note]
+        elif not income and app.get("shareIncome"):
+            # Income is optional in the full profile: the wallet leaves out a document it doesn't have or that
+            # expired, and never says which, so we can't tell the two apart.
+            decision["reasons"] = [r for r in decision.get("reasons", []) if r.get("code") != "INCOME_NOT_SHARED"] + [
+                reason("INCOME_NOT_RECEIVED", "We didn't receive an income document from your wallet. "
+                                              "If yours has expired, ask your income provider for a new one.")]
         app["decision"] = decision
         app["trust"] = trust.build_report(
             [c.get("type") for c in payload.get("credentials", [])], income is not None,

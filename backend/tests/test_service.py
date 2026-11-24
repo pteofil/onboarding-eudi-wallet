@@ -163,6 +163,18 @@ def test_income_of_someone_else_is_ignored(keys):
     assert "INCOME_NOT_LINKED" in codes and "INCOME_NOT_SHARED" not in codes
 
 
+def test_income_asked_but_not_received(keys):
+    credentials = [{"type": "PID_RO", "claims": PID}, {"type": "ADDRESS", "claims": ADDRESS}]
+    svc = service(keys, FakeVerifier([sealed(keys, credentials=credentials)]))
+    app_id = svc.create(True)["applicationId"]
+
+    assert svc.status(app_id)["status"] == "VERIFIED"
+    decision = svc.review(app_id)["decision"]
+    codes = [r["code"] for r in decision["reasons"]]
+    assert "INCOME_NOT_RECEIVED" in codes and "INCOME_NOT_SHARED" not in codes
+    assert decision["recommended"] in ("Simple", "Starter")
+
+
 def test_confirm_only_eligible_package(keys):
     svc = service(keys, FakeVerifier([sealed(keys)]))
     app_id = svc.create(False)["applicationId"]
