@@ -28,6 +28,13 @@ API (JSON):
 | `GET /applications/{id}/review` | verified identity, masked CNP, address, `incomeShared`, package `decision` |
 | `POST /applications/{id}/confirm {package?}` | `{package, iban, reference}` (simulated) |
 
+Deploy (arm64, Python 3.12, handler `handler.lambda_handler`, Function URL):
+```
+AWS_PROFILE=<profile> FUNCTION_NAME=<lambda name> python3 deploy.py
+```
+Lambda env vars: `USE_DYNAMO=1`, `TABLE_NAME` (partition key `pk` String, TTL `expiresAt`), the verifier settings
+from `.env.example`, or `STUB_VERIFIER=1` while the verifier isn't configured.
+
 The stub verifier's `deepLink` points straight back to the app's callback, so the hand-off can be built without Tremend.
 It skips all trust checks and must never be used in the demo.
 
@@ -38,7 +45,7 @@ Secrets live only in `backend/.env` (local) and Lambda environment variables (cl
 - `backend/verifier_client.py` - HMAC-signed Website API client (checked against the Starter Pack sample)
 - `backend/validator.py` + tests - sealed result decryption and validation (Starter Pack page 11)
 
-Built during the event: `service.py`, `handler.py`, `store.py`, `local_server.py`, `stub_verifier.py`.
+Built during the event: `service.py`, `handler.py`, `store.py`, `local_server.py`, `stub_verifier.py`, `deploy.py`.
 
 ## Mocked / simplified
 - Package thresholds and benefits are illustrative

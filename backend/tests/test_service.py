@@ -158,7 +158,6 @@ def test_stub_flow_through_lambda_handler(monkeypatch):
     _, created = call("POST", "/applications", {"shareIncome": True})
     assert created["deepLink"].startswith("ro.banking40.team01://same-device#response_code=")
     app = f"/applications/{created['applicationId']}"
-    assert call("GET", f"{app}/status")[1]["status"] == "PENDING"
     assert call("POST", f"{app}/claim", {"responseCode": "stub-code"})[1]["status"] == "VERIFIED"
     assert call("GET", f"{app}/review")[1]["incomeShared"] is True
     assert call("POST", f"{app}/confirm", {})[1]["status"] == "CONFIRMED"

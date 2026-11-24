@@ -20,25 +20,21 @@ STUB_INCOME = {
 
 
 class StubVerifier:
-    def __init__(self):
-        self._tx: dict = {}
+    """Stateless (Lambda instances don't share memory): the profile is encoded in the transaction id."""
 
     def start(self, profile: str, return_uri: str | None = None) -> dict:
-        tx = f"stub-{uuid.uuid4()}"
-        self._tx[tx] = {"profile": profile, "claimed": False}
+        tx = f"stub-{'full' if profile.endswith('FULL') else 'basic'}-{uuid.uuid4()}"
         return {"transactionId": tx, "deepLink": f"{return_uri}#response_code=stub-code"}
 
     def claim(self, transaction_id: str, response_code: str) -> dict:
-        self._tx[transaction_id]["claimed"] = True
         return {}
 
     def status(self, transaction_id: str) -> dict:
-        claimed = self._tx.get(transaction_id, {}).get("claimed")
-        return {"status": "COMPLETED" if claimed else "REQUEST_RETRIEVED"}
+        return {"status": "COMPLETED"}
 
     def collect(self, transaction_id: str) -> str:
         credentials = [{"type": "PID_RO", "claims": STUB_PID}, {"type": "ADDRESS_RO", "claims": STUB_ADDRESS}]
-        if self._tx[transaction_id]["profile"].endswith("FULL"):
+        if transaction_id.startswith("stub-full-"):
             credentials.append({"type": "INCOME_RO", "claims": STUB_INCOME})
         return json.dumps({
             "jti": f"stub-{uuid.uuid4()}", "transactionId": transaction_id,
@@ -46,4 +42,4 @@ class StubVerifier:
         })
 
     def acknowledge(self, transaction_id: str) -> None:
-        self._tx.pop(transaction_id, None)
+        pass
