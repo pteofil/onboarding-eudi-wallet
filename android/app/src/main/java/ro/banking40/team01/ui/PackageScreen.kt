@@ -102,7 +102,12 @@ private fun PackageCard(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(packageLabel(name), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                Column(Modifier.weight(1f)) {
+                    Text(packageLabel(name), style = MaterialTheme.typography.titleLarge)
+                    packageFee(name)?.let {
+                        Text(it, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
                 RadioButton(selected = selected, onClick = null, enabled = eligible)
             }
             packageDescription(name)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
@@ -150,6 +155,16 @@ fun packageDescription(name: String): String? = when (name) {
     "Starter" -> stringResource(R.string.pkg_starter_desc)
     "Plus" -> stringResource(R.string.pkg_plus_desc)
     "Premium" -> stringResource(R.string.pkg_premium_desc)
+    else -> null
+}
+
+/** Monthly fee for a backend package id; unknown ids show no fee. */
+@Composable
+fun packageFee(name: String): String? = when (name) {
+    "Simple" -> stringResource(R.string.pkg_simple_fee)
+    "Starter" -> stringResource(R.string.pkg_starter_fee)
+    "Plus" -> stringResource(R.string.pkg_plus_fee)
+    "Premium" -> stringResource(R.string.pkg_premium_fee)
     else -> null
 }
 

@@ -150,7 +150,7 @@
     <!-- ===== Final copy from Dana (24 Nov), kept verbatim ===== -->
     <!-- Screen 2: consent -->
     <string name="consent_header">To open your account, we\'ll ask your EUDI Wallet for:</string>
-    <string name="consent_identity_title">Your name, date of birth and personal identification number (CNP)</string>
+    <string name="consent_identity_title">Your name, date of birth, nationality and personal identification number (CNP)</string>
     <string name="consent_identity_body">We need them to confirm who you are, as the law requires for every new account. Your age tells us which packages you can choose, and your CNP lets us check that an income document is really yours.</string>
     <string name="consent_address_title">Your home address</string>
     <string name="consent_address_body">We need it to confirm where you live and to send your card.</string>
@@ -188,11 +188,16 @@
     <string name="pkg_simple">Simple</string>
     <string name="pkg_simple_desc">Current account + virtual card</string>
     <string name="pkg_starter">Starter</string>
-    <string name="pkg_starter_desc">Simple + physical card, no monthly fee</string>
+    <string name="pkg_starter_desc">Everything in Simple · free physical debit card · free withdrawals at any ATM in Romania · bonus savings interest</string>
     <string name="pkg_plus">Plus</string>
     <string name="pkg_plus_desc">Physical card + higher savings interest + better deposit rates</string>
     <string name="pkg_premium">Premium</string>
     <string name="pkg_premium_desc">Plus + lounge access + travel insurance + life insurance</string>
+    <!-- Monthly fee, shown next to the package name. Fictional bank. -->
+    <string name="pkg_simple_fee">0 RON / month</string>
+    <string name="pkg_starter_fee">0 RON / month</string>
+    <string name="pkg_plus_fee">15 RON / month</string>
+    <string name="pkg_premium_fee">39 RON / month</string>
 
     <!-- Error and edge screens -->
     <string name="err_declined_title">No problem</string>

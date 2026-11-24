@@ -275,6 +275,9 @@ private fun PackageSummary(account: Account) {
                 stringResource(R.string.dashboard_your_package, packageLabel(account.packageName)),
                 style = MaterialTheme.typography.titleMedium,
             )
+            packageFee(account.packageName)?.let {
+                Text(it, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+            }
             packageDescription(account.packageName)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             LabeledValue(stringResource(R.string.welcome_iban), account.iban.chunked(4).joinToString(" "))
             Text(
