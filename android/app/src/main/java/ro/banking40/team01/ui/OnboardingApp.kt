@@ -67,7 +67,11 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                     onShareIncomeChange = viewModel::setShareIncome,
                     onContinue = viewModel::continueWithWallet,
                 )
-                Screen.Handoff -> HandoffScreen(onTryAgain = viewModel::tryAgain)
+                Screen.Handoff -> HandoffScreen(
+                    incomeRequested = state.shareIncome,
+                    onTryAgain = viewModel::tryAgain,
+                    onContinueWithoutIncome = viewModel::continueWithoutIncome,
+                )
                 Screen.Verifying -> VerifyingScreen()
                 Screen.Review -> state.review?.let { review ->
                     ReviewScreen(

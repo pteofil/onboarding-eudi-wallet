@@ -131,6 +131,16 @@ class OnboardingViewModel(
     /** A cancel in the wallet leaves the old request pending until it expires: start a fresh one. */
     fun tryAgain() = startApplication()
 
+    /**
+     * An expired income document makes the wallet refuse the whole ONBOARD_FULL request without coming back or telling
+     * the backend. Drop income and start a fresh ONBOARD_BASIC request (startApplication cancels the current polling).
+     */
+    fun continueWithoutIncome() {
+        _state.update { it.copy(shareIncome = false) }
+        savedShareIncome = false
+        startApplication()
+    }
+
     fun reset() {
         job?.cancel()
         applicationId = null

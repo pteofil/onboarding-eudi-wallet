@@ -51,6 +51,8 @@
     <string name="handoff_title">Opening your EUDI Wallet…</string>
     <string name="handoff_body">Check who is asking and which details, then tap Share in your wallet. You will come back here automatically.</string>
     <string name="handoff_not_opened">Didn\'t share, or nothing happened?</string>
+    <string name="btn_continue_without_income">Continue without income</string>
+    <string name="handoff_income_hint">Wallet couldn\'t share your income? It may have expired. You can continue without it and choose Simple or Starter.</string>
 
     <!-- 4 Verifying -->
     <string name="verifying_title">Verifying your details…</string>
@@ -173,7 +175,7 @@
     <string name="reason_needs_premium">Premium needs a net income of at least 10,000 RON a month.</string>
     <string name="reason_income_not_shared">You didn\'t share your income, so we\'ve shown packages that don\'t need it.</string>
     <string name="reason_income_not_linked">We couldn\'t match your income document to your identity, so we didn\'t use it.</string>
-    <string name="reason_income_not_received">You chose to share your income, but your wallet didn\'t send it, so we\'ve shown packages that don\'t need it.</string>
+    <string name="reason_income_not_received">We didn\'t receive an income document from your wallet. If yours has expired, ask your income provider for a new one.</string>
     <string name="reason_travel_ins_ok">Travel insurance is included (available up to age 70).</string>
     <string name="reason_travel_ins_age">Travel insurance isn\'t available at your age (up to age 70).</string>
     <string name="reason_life_ins_ok">Life insurance is included (available up to age 80).</string>
