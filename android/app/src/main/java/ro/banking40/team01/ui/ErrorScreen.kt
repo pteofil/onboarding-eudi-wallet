@@ -25,7 +25,7 @@ fun ErrorScreen(
     StepLayout(title = stringResource(title), body = stringResource(body)) {
         if (kind.canRetry) {
             Button(onClick = onTryAgain, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.action_try_again))
+                Text(stringResource(kind.retryLabel()))
             }
         }
         if (kind.offersForm) {
@@ -37,6 +37,12 @@ fun ErrorScreen(
             Text(stringResource(R.string.action_back_to_start))
         }
     }
+}
+
+/** A fresh request ("Try again") after the customer's own choice or a timeout; "Retry" after a failure. */
+private fun ErrorKind.retryLabel(): Int = when (this) {
+    ErrorKind.WALLET_ERROR, ErrorKind.NOT_VERIFIED, ErrorKind.TECHNICAL -> R.string.action_retry
+    else -> R.string.action_try_again
 }
 
 private fun ErrorKind.texts(): Pair<Int, Int> = when (this) {

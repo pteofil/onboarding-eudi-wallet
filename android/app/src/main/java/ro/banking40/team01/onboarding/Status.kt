@@ -1,8 +1,11 @@
 package ro.banking40.team01.onboarding
 
-/** Everything that ends the wallet step without an account. One reusable error screen per kind. */
+/**
+ * Everything that ends the wallet step without an account. One reusable error screen per kind.
+ * Withheld income is not here: the backend still verifies and recommends Simple or Starter.
+ */
 enum class ErrorKind(val canRetry: Boolean, val offersForm: Boolean) {
-    DECLINED(canRetry = true, offersForm = true),
+    DECLINED(canRetry = true, offersForm = false),
     EXPIRED(canRetry = true, offersForm = false),
     WALLET_ERROR(canRetry = true, offersForm = false),
     NOT_VERIFIED(canRetry = true, offersForm = false),

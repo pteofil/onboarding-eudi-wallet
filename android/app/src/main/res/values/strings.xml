@@ -109,22 +109,23 @@
 
     <!-- Shared actions -->
     <string name="action_try_again">Try again</string>
+    <string name="action_retry">Retry</string>
     <string name="action_fill_form">Fill in the form</string>
     <string name="action_back_to_start">Back to start</string>
 
     <!-- Error states -->
     <string name="error_declined_title">Nothing was shared</string>
-    <string name="error_declined_body">No problem, nothing was shared.</string>
+    <string name="error_declined_body">No problem, nothing was shared. You can start again whenever you\'re ready.</string>
     <string name="error_expired_title">Request expired</string>
-    <string name="error_expired_body">The request timed out.</string>
+    <string name="error_expired_body">The request timed out before your wallet answered. Nothing was shared.</string>
     <string name="error_wallet_title">Wallet problem</string>
     <string name="error_wallet_body">Your wallet couldn\'t complete the request.</string>
     <string name="error_not_verified_title">Verification failed</string>
     <string name="error_not_verified_body">We couldn\'t verify the data.</string>
-    <string name="error_missing_identity_title">Details missing</string>
-    <string name="error_missing_identity_body">We need your identity and address to open an account.</string>
-    <string name="error_under_18_title">You need to be 18</string>
-    <string name="error_under_18_body">You need to be 18 to open an account on your own. A parent or guardian can open an account for minors with you at any of our branches.</string>
+    <string name="error_missing_identity_title">We need your identity and address</string>
+    <string name="error_missing_identity_body">To open an account we need both your identity and your address from your EUDI Wallet. Please try again and share both.</string>
+    <string name="error_under_18_title">Thank you for your interest</string>
+    <string name="error_under_18_body">You need to be 18 to open an account on your own. Until then, a parent or guardian can open an account for minors for you at any of our branches. We\'d be happy to welcome you.</string>
     <string name="error_no_wallet_title">EUDI Wallet not found</string>
     <string name="error_no_wallet_body">Install the EUDI Wallet on this phone, then try again.</string>
     <string name="error_technical_title">Something went wrong</string>
