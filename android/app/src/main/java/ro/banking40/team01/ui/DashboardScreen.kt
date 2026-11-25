@@ -27,12 +27,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -46,6 +44,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,11 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ro.banking40.team01.R
 import ro.banking40.team01.onboarding.Account
-import ro.banking40.team01.onboarding.KycProfile
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import ro.banking40.team01.onboarding.initials
 import ro.banking40.team01.ui.theme.BrandMint
 import ro.banking40.team01.ui.theme.BrandNavy
 import ro.banking40.team01.ui.theme.BrandTeal
@@ -65,7 +61,7 @@ import ro.banking40.team01.ui.theme.VerifiedStartTheme
 
 /** After onboarding: a simple account home that marks the switch from onboarding to banking. */
 @Composable
-fun DashboardScreen(account: Account, onLogout: () -> Unit, onNotInDemo: () -> Unit) {
+fun DashboardScreen(account: Account, onOpenProfile: () -> Unit, onNotInDemo: () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
@@ -73,14 +69,13 @@ fun DashboardScreen(account: Account, onLogout: () -> Unit, onNotInDemo: () -> U
             .verticalScroll(rememberScrollState())
             .navigationBarsPadding(),
     ) {
-        Header(account, onLogout)
+        Header(account, onOpenProfile)
         Column(
             modifier = Modifier.padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             QuickActions(onNotInDemo)
             PackageSummary(account)
-            account.kyc?.let { KycCard(it) }
             Activity()
             Spacer(Modifier.height(8.dp))
         }
@@ -88,7 +83,7 @@ fun DashboardScreen(account: Account, onLogout: () -> Unit, onNotInDemo: () -> U
 }
 
 @Composable
-private fun Header(account: Account, onLogout: () -> Unit) {
+private fun Header(account: Account, onOpenProfile: () -> Unit) {
     Box {
         // The gradient stops halfway down the card, so the card overlaps it.
         Box(
@@ -114,9 +109,7 @@ private fun Header(account: Account, onLogout: () -> Unit) {
                     color = Color.White,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onLogout, colors = ButtonDefaults.textButtonColors(contentColor = Color.White)) {
-                    Text(stringResource(R.string.dashboard_logout))
-                }
+                ProfileButton(account, onOpenProfile)
             }
             Spacer(Modifier.height(12.dp))
             Text(
@@ -295,41 +288,43 @@ private fun PackageSummary(account: Account) {
     }
 }
 
-/** The KYC record the onboarding produced: what the wallet verified and what the customer declared. */
+/** The customer's initials; a mint tick once KYC is complete. Opens the profile with the KYC record. */
 @Composable
-private fun KycCard(kyc: KycProfile) {
-    val verified = walletKycItems(kyc.identity, kyc.maskedCnp, kyc.address, kyc.incomeVerified)
-    val declared = declaredKycItems(kyc.incomeVerified)
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.dashboard_kyc_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White,
-                    shape = CircleShape,
-                ) {
-                    Text(
-                        stringResource(R.string.dashboard_kyc_complete),
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    )
-                }
-            }
-            KycSummary(stringResource(R.string.dashboard_kyc_summary, verified.size, declared.size))
-            verified.forEach { KycLine(it.label, it.value, fromWallet = true) }
-            declared.forEach { (label, value) -> KycLine(label, value, fromWallet = false) }
-            val completedOn = Instant.ofEpochMilli(kyc.completedAtMillis).atZone(ZoneId.systemDefault()).toLocalDate()
-                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+private fun ProfileButton(account: Account, onClick: () -> Unit) {
+    val description = stringResource(R.string.profile_open)
+    Box(
+        Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .clickable(onClickLabel = description, onClick = onClick)
+            .semantics { contentDescription = description },
+    ) {
+        Box(
+            Modifier
+                .padding(2.dp)
+                .fillMaxSize()
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center,
+        ) {
             Text(
-                stringResource(R.string.dashboard_kyc_completed, completedOn),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
+                initials(account.fullName),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
             )
+        }
+        if (account.kyc != null) {
+            Box(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(16.dp)
+                    .clip(CircleShape)
+                    .background(BrandMint),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("✓", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = BrandNavy)
+            }
         }
     }
 }
@@ -392,7 +387,7 @@ private fun cardColors(packageName: String): List<Color> = when (packageName) {
 private fun DashboardPreview() = VerifiedStartTheme {
     DashboardScreen(
         Account("Ana", "ANA IONESCU", "Plus", "RO71DEMO1210141723597382", "VS-FAE69F55", 102),
-        onLogout = {},
+        onOpenProfile = {},
         onNotInDemo = {},
     )
 }

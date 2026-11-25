@@ -117,9 +117,12 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                 Screen.Dashboard -> state.account?.let { account ->
                     DashboardScreen(
                         account = account,
-                        onLogout = viewModel::logout,
+                        onOpenProfile = viewModel::openProfile,
                         onNotInDemo = { viewModel.showNotice(Notice.NOT_IN_DEMO) },
                     )
+                }
+                Screen.Profile -> state.account?.let { account ->
+                    ProfileScreen(account = account, onBack = viewModel::openDashboard, onLogout = viewModel::logout)
                 }
                 is Screen.Error -> ErrorScreen(
                     kind = screen.kind,

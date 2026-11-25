@@ -36,6 +36,7 @@ import kotlin.time.Duration.Companion.minutes
 sealed interface Screen {
     data object Landing : Screen // animated intro
     data object Dashboard : Screen // after onboarding
+    data object Profile : Screen // from the dashboard: who the customer is and their KYC record
     data object Start : Screen // 1 Become a client
     data object FormDetails : Screen // manual form 1/2 (demo only)
     data object FormAddress : Screen // manual form 2/2 (demo only)
@@ -113,6 +114,8 @@ class OnboardingViewModel(
     /** Welcome -> dashboard; without account details (e.g. after a restart) back to the start. */
     fun openDashboard() = if (_state.value.account != null) show(Screen.Dashboard) else reset()
 
+    fun openProfile() = if (_state.value.account != null) show(Screen.Profile) else reset()
+
     fun logout() = reset()
 
     fun openForm() = show(Screen.FormDetails)
@@ -154,6 +157,7 @@ class OnboardingViewModel(
     fun back() = when (_state.value.screen) {
         Screen.Consent, Screen.FormDetails, Screen.FormSubmitted -> show(Screen.Start)
         Screen.FormAddress -> show(Screen.FormDetails)
+        Screen.Profile -> openDashboard()
         Screen.Kyc -> show(Screen.Review)
         Screen.Package -> show(Screen.Kyc)
         Screen.Confirm -> if (!_state.value.signing) show(Screen.Package) else Unit

@@ -17,3 +17,10 @@ data class Account(
 fun displayName(raw: String): String = raw.trim().lowercase().split(" ").joinToString(" ") { word ->
     word.split("-").joinToString("-") { it.replaceFirstChar(Char::uppercase) }
 }
+
+/** "ANA-MARIA POPESCU" -> "AP": first letters of the first and last name, for the profile button. */
+fun initials(fullName: String?): String {
+    val words = fullName?.trim()?.split(Regex("\\s+"))?.filter { it.isNotEmpty() }.orEmpty()
+    return listOfNotNull(words.firstOrNull(), words.drop(1).lastOrNull())
+        .joinToString("") { it.first().uppercase() }
+}

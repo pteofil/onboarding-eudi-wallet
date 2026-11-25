@@ -92,7 +92,8 @@ With `returnToApp=false` the user taps Close in the wallet and switches back; th
    what the wallet verified is listed by name only, since Review just showed the values; then the declarations no
    wallet can answer: PEP, tax residency, own behalf, purpose; source of funds too when income wasn't shared)
    -> 6 Your package (recommendation, reasons, insurance, other eligible packages,
-   not-eligible ones with the reason) -> 7 Confirm (terms, Sign) -> 8 Welcome -> Dashboard -> Log out.
+   not-eligible ones with the reason) -> 7 Confirm (terms, Sign) -> 8 Welcome -> Dashboard -> profile button
+   (KYC record: what the wallet verified, what was declared) -> Log out.
 3. **Manual journey (contrast only):** two prefilled form screens -> "Application received, 2–3 working days".
    Nothing is sent; it shows what the wallet replaces (11 typed fields and 2 uploads vs 2 prefilled fields and 0 uploads).
 4. **Unhappy paths:** `DECLINED`, `EXPIRED`, `WALLET_ERROR`, `NOT_VERIFIED`, `MISSING_IDENTITY` and `UNDER_18` each get
@@ -135,6 +136,6 @@ verified data. Simulated:
   "not available in this demo"
 - The manual onboarding path is a prefilled mock-up; nothing is submitted
 - KYC declarations (PEP, tax residency/FATCA-CRS, own behalf, purpose, source of funds) start unticked and stay in
-  the app; there is no sanctions or PEP list screening. The dashboard's KYC profile is built from the verified review
+  the app; there is no sanctions or PEP list screening. The profile's KYC record is built from the verified review
   data plus these declarations, in memory only
 - Stub mode (`stub=true`, backend `ALLOW_STUB=1`) returns fixed test data for UI work only and is marked TEST DATA
