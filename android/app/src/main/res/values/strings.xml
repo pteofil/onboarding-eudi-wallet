@@ -112,8 +112,6 @@
     <string name="kyc_value_romania_only">Romania only</string>
     <string name="kyc_value_myself">Myself</string>
     <string name="kyc_value_everyday">Salary and everyday payments</string>
-    <string name="kyc_source_wallet">EUDI Wallet</string>
-    <string name="kyc_source_declared">Declared</string>
     <string name="kyc_decl_not_pep">I\'m not a politically exposed person (PEP), nor a family member or close associate of one.</string>
     <string name="kyc_decl_tax">I\'m tax resident only in Romania and I\'m not a US person (FATCA/CRS).</string>
     <string name="kyc_decl_own_behalf">I\'m opening this account for myself, not on behalf of someone else.</string>
@@ -125,6 +123,12 @@
     <string name="dashboard_kyc_complete">✓ Complete</string>
     <string name="dashboard_kyc_summary">%1$d details verified by your EUDI Wallet · %2$d declared by you</string>
     <string name="dashboard_kyc_completed">Completed %1$s · no ID photo, selfie or video call</string>
+    <string name="profile_open">Open your profile</string>
+    <string name="profile_title">Your profile</string>
+    <string name="profile_package">Flash Bank · %1$s package</string>
+    <string name="profile_wallet_section">Verified by your EUDI Wallet</string>
+    <string name="profile_declared_section">Declared by you</string>
+    <string name="profile_back">Back to my account</string>
 
     <!-- 6 Your package: the app's own strings; final copy is in the block from Dana below -->
     <string name="package_title">Your package</string>

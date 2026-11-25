@@ -189,7 +189,7 @@ fun KycSummary(text: String) {
     }
 }
 
-/** One KYC detail with where it came from: the wallet (verified) or the customer (declared). */
+/** One KYC detail, marked ✓ when the wallet verified it and • when the customer declared it. */
 @Composable
 fun KycLine(label: String, value: String, fromWallet: Boolean) {
     Row(verticalAlignment = Alignment.Top) {
@@ -203,12 +203,6 @@ fun KycLine(label: String, value: String, fromWallet: Boolean) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
             Text(value, style = MaterialTheme.typography.bodyLarge)
         }
-        Text(
-            stringResource(if (fromWallet) R.string.kyc_source_wallet else R.string.kyc_source_declared),
-            style = MaterialTheme.typography.labelSmall,
-            color = if (fromWallet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(start = 8.dp),
-        )
     }
 }
 
