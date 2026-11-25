@@ -24,6 +24,9 @@ object WalletReturn {
         return param(fragment, RESPONSE_CODE) ?: param(query, RESPONSE_CODE)
     }
 
+    /** The URI with every `response_code` value replaced, so the one-time code never reaches the log. */
+    fun redacted(uri: String): String = uri.replace(Regex("(response_code=)[^&#]*"), "$1***")
+
     private fun param(part: String, name: String): String? =
         part.split('&').firstNotNullOfOrNull { pair ->
             val key = decode(pair.substringBefore('='))

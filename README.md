@@ -77,12 +77,42 @@ Without `teamDebug.storeFile` the build falls back to the default debug key and 
 Wallet hand-off: `POST /applications` -> open `deepLink` -> the wallet returns to
 `ro.banking40.team01://same-device#response_code=...` -> `POST /claim` -> poll `/status` every 1.5 s.
 The app only shows what the backend decides; the wallet's return alone never counts as verified.
-Debug builds log the full return URI (tag `VerifiedStart`).
+Debug builds log the return URI with the `response_code` masked (tag `VerifiedStart`); HTTP bodies are never logged.
 
 The event wallet only returns to the verifier SDK's callback class inside the team package
 (`eu.europa.ec.euidi.verifier.presentation.ui.SameDeviceCallbackActivity`); it does nothing if that class is missing.
 We don't use the SDK, so the app ships a same-named activity that forwards the URI to `MainActivity`.
 With `returnToApp=false` the user taps Close in the wallet and switches back; the app polls on resume.
+
+### Journeys in the app
+1. **Landing** (animated intro) -> **1 Become a client**: "Onboard with EUDI Wallet" or "Manual onboarding".
+2. **Wallet journey (the real one):** 2 Consent (what we ask and why; income switch off = `ONBOARD_BASIC`,
+   on = `ONBOARD_FULL`) -> 3 Wallet hand-off -> 4 Verifying -> 5 Review (verified data read-only, "Verified via
+   EUDI Wallet"; phone and email) -> 6 Your package (recommendation, reasons, insurance, other eligible packages,
+   not-eligible ones with the reason) -> 7 Confirm (terms, Sign) -> 8 Welcome -> Dashboard -> Log out.
+3. **Manual journey (contrast only):** two prefilled form screens -> "Application received, 2–3 working days".
+   Nothing is sent; it shows what the wallet replaces (11 typed fields and 2 uploads vs 2 prefilled fields and 0 uploads).
+4. **Unhappy paths:** `DECLINED`, `EXPIRED`, `WALLET_ERROR`, `NOT_VERIFIED`, `MISSING_IDENTITY` and `UNDER_18` each get
+   a screen with Try again (except under 18) and Help. A cancel in the wallet leaves the request pending until it
+   expires, so the hand-off screen always offers Try again. Withheld income is not an error: Simple or Starter is offered.
+
+All copy is in `res/values/strings.xml`; backend reason codes map to `reason_<code>` / `assumption_<code>` strings,
+with the backend's English text as fallback.
+
+### Running the demo APK (jury)
+1. Install the event wallet (`Banking-Journeys-Wallet.apk` from the team package), set a screen lock and issue the
+   test documents (Starter Pack, "Issue three documents").
+2. Install `app-debug.apk` from the GitHub release on the **same** phone. It is signed with the team's debug key; the
+   wallet only returns to an app with this application ID and signature.
+3. Open Flash Bank -> Get started -> Onboard with EUDI Wallet -> Open my EUDI Wallet -> Share (PIN) -> Close.
+   The app polls the hosted backend and continues to Review.
+
+### Test steps
+- Unit tests: `cd android && ./gradlew :app:testDebugUnitTest` (`response_code` parsing and masking, status -> screen mapping).
+- On a phone with the hosted backend, run the Starter Pack scenarios: high stable income (Premium), regular and lower
+  income (Plus or Simple/Starter), variable income (lowest of six months), income expired, income belongs to someone
+  else (income not used, reason shown), plus: cancel in the wallet -> Try again, switch off income -> Simple/Starter.
+- UI work without the wallet: `stub=true` in `local.properties` (shows a TEST DATA chip). Switch it off before a demo.
 
 ## Prepared before kickoff
 - Repository skeleton, `.gitignore`
@@ -92,5 +122,13 @@ With `returnToApp=false` the user taps Close in the wallet and switches back; th
 Built during the event: `service.py`, `handler.py`, `store.py`, `local_server.py`, `stub_verifier.py`, `deploy.py`, `android/`.
 
 ## Mocked / simplified
-- Package thresholds and benefits are illustrative
-- No real account opening; the flow ends at a confirmation screen
+Real: the wallet share, the Tremend verifier, our backend's decryption and checks, and the package decision from the
+verified data. Simulated:
+- Package thresholds, prices and benefits are illustrative (Flash Bank is fictional)
+- No real account opening: `/confirm` returns a demo IBAN (`RO..DEMO..`) and reference
+- Phone and email are prefilled on Review; the SMS code is simulated (no SMS is sent)
+- "Sign" on Confirm is a simulated signature, not SCA or a qualified signature
+- The dashboard (balance 987.00 RON, card, quick actions, activity) is demo data; quick actions and Help show
+  "not available in this demo"
+- The manual onboarding path is a prefilled mock-up; nothing is submitted
+- Stub mode (`stub=true`, backend `ALLOW_STUB=1`) returns fixed test data for UI work only and is marked TEST DATA

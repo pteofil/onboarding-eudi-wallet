@@ -34,6 +34,14 @@ class WalletReturnTest {
     }
 
     @Test
+    fun redactsTheCodeWherever() {
+        assertEquals(
+            "ro.banking40.team01://same-device?response_code=***#state=x&response_code=***",
+            WalletReturn.redacted("ro.banking40.team01://same-device?response_code=q1#state=x&response_code=f%2B2"),
+        )
+    }
+
+    @Test
     fun missingOrEmptyCodeIsNull() {
         assertNull(WalletReturn.responseCode("ro.banking40.team01://same-device"))
         assertNull(WalletReturn.responseCode("ro.banking40.team01://same-device#response_code="))

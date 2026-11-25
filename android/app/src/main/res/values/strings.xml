@@ -51,6 +51,8 @@
     <string name="handoff_title">Opening your EUDI Wallet…</string>
     <string name="handoff_body">Check who is asking and which details, then tap Share in your wallet. You will come back here automatically.</string>
     <string name="handoff_not_opened">Didn\'t share, or nothing happened?</string>
+    <string name="btn_continue_without_income">Continue without income</string>
+    <string name="handoff_income_hint">Wallet couldn\'t share your income? It may have expired. You can continue without it and choose Simple or Starter.</string>
 
     <!-- 4 Verifying -->
     <string name="verifying_title">Verifying your details…</string>
@@ -121,7 +123,7 @@
     <string name="dashboard_logout">Log out</string>
     <string name="dashboard_greeting">Hello, %1$s</string>
     <string name="dashboard_greeting_plain">Hello</string>
-    <string name="dashboard_balance_label">Available balance</string>
+    <string name="dashboard_balance_label">Available balance (demo data)</string>
     <string name="dashboard_balance">987.00 RON</string>
     <string name="dashboard_opened_in">Account opened in %1$s with your EUDI Wallet</string>
     <string name="duration_seconds">%1$d s</string>
@@ -148,7 +150,7 @@
     <!-- ===== Final copy from Dana (24 Nov), kept verbatim ===== -->
     <!-- Screen 2: consent -->
     <string name="consent_header">To open your account, we\'ll ask your EUDI Wallet for:</string>
-    <string name="consent_identity_title">Your name, date of birth and personal identification number (CNP)</string>
+    <string name="consent_identity_title">Your name, date of birth, nationality and personal identification number (CNP)</string>
     <string name="consent_identity_body">We need them to confirm who you are, as the law requires for every new account. Your age tells us which packages you can choose, and your CNP lets us check that an income document is really yours.</string>
     <string name="consent_address_title">Your home address</string>
     <string name="consent_address_body">We need it to confirm where you live and to send your card.</string>
@@ -173,6 +175,7 @@
     <string name="reason_needs_premium">Premium needs a net income of at least 10,000 RON a month.</string>
     <string name="reason_income_not_shared">You didn\'t share your income, so we\'ve shown packages that don\'t need it.</string>
     <string name="reason_income_not_linked">We couldn\'t match your income document to your identity, so we didn\'t use it.</string>
+    <string name="reason_income_not_received">We didn\'t receive an income document from your wallet. If yours has expired, ask your income provider for a new one.</string>
     <string name="reason_travel_ins_ok">Travel insurance is included (available up to age 70).</string>
     <string name="reason_travel_ins_age">Travel insurance isn\'t available at your age (up to age 70).</string>
     <string name="reason_life_ins_ok">Life insurance is included (available up to age 80).</string>
@@ -185,11 +188,16 @@
     <string name="pkg_simple">Simple</string>
     <string name="pkg_simple_desc">Current account + virtual card</string>
     <string name="pkg_starter">Starter</string>
-    <string name="pkg_starter_desc">Simple + physical card, no monthly fee</string>
+    <string name="pkg_starter_desc">Everything in Simple · free physical debit card · free withdrawals at any ATM in Romania · bonus savings interest</string>
     <string name="pkg_plus">Plus</string>
     <string name="pkg_plus_desc">Physical card + higher savings interest + better deposit rates</string>
     <string name="pkg_premium">Premium</string>
     <string name="pkg_premium_desc">Plus + lounge access + travel insurance + life insurance</string>
+    <!-- Monthly fee, shown next to the package name. Fictional bank. -->
+    <string name="pkg_simple_fee">0 RON / month</string>
+    <string name="pkg_starter_fee">0 RON / month</string>
+    <string name="pkg_plus_fee">15 RON / month</string>
+    <string name="pkg_premium_fee">39 RON / month</string>
 
     <!-- Error and edge screens -->
     <string name="err_declined_title">No problem</string>
