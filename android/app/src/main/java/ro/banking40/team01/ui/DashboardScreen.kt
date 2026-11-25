@@ -321,7 +321,7 @@ private fun KycCard(kyc: KycProfile) {
                 }
             }
             KycSummary(stringResource(R.string.dashboard_kyc_summary, verified.size, declared.size))
-            verified.forEach { (label, value) -> KycLine(label, value, fromWallet = true) }
+            verified.forEach { KycLine(it.label, it.value, fromWallet = true) }
             declared.forEach { (label, value) -> KycLine(label, value, fromWallet = false) }
             val completedOn = Instant.ofEpochMilli(kyc.completedAtMillis).atZone(ZoneId.systemDefault()).toLocalDate()
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))

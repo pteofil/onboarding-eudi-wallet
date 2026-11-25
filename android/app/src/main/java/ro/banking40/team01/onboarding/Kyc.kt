@@ -4,16 +4,16 @@ import kotlinx.serialization.json.JsonObject
 import ro.banking40.team01.api.Identity
 
 /**
- * The KYC declarations no wallet can answer. Pre-ticked for the demo; kept in memory only, nothing is sent.
+ * The KYC declarations no wallet can answer. Unticked until the customer confirms each one; kept in memory only, nothing is sent.
  * A real bank would also screen the name against sanctions and PEP lists.
  */
 data class KycDeclarations(
-    val notPep: Boolean = true,
-    val taxResidentRomaniaOnly: Boolean = true,
-    val ownBehalf: Boolean = true,
-    val everydayUse: Boolean = true,
+    val notPep: Boolean = false,
+    val taxResidentRomaniaOnly: Boolean = false,
+    val ownBehalf: Boolean = false,
+    val everydayUse: Boolean = false,
     /** Asked only when income wasn't shared; otherwise the verified income attestation answers it. */
-    val salaryIncome: Boolean = true,
+    val salaryIncome: Boolean = false,
 ) {
     fun complete(incomeVerified: Boolean): Boolean =
         notPep && taxResidentRomaniaOnly && ownBehalf && everydayUse && (incomeVerified || salaryIncome)

@@ -91,12 +91,14 @@
     <string name="consent_kyc_body">The law requires us to verify every new customer. Your verified identity and address do that for us: no ID photo, selfie or video call. Afterwards you\'ll confirm a few short declarations.</string>
     <string name="kyc_title">Know your customer (KYC)</string>
     <string name="kyc_body">Your EUDI Wallet has already verified most of what the law asks us to check. Please confirm the rest.</string>
-    <string name="kyc_summary">✓ %1$d verified by your EUDI Wallet · %2$d to confirm</string>
+    <string name="kyc_progress">%1$d of %2$d KYC checks done</string>
     <string name="kyc_verified_section">From your wallet</string>
+    <string name="kyc_verified_hint">You reviewed these on the previous screen. Nothing to type or upload.</string>
     <string name="kyc_declarations_section">Your declarations</string>
     <string name="kyc_name">Name</string>
     <string name="kyc_birth_date">Date of birth</string>
     <string name="kyc_cnp">Personal identification number (CNP)</string>
+    <string name="kyc_cnp_short">CNP</string>
     <string name="kyc_nationality">Nationality</string>
     <string name="kyc_address">Home address</string>
     <string name="kyc_source_of_funds">Source of funds</string>
@@ -117,7 +119,7 @@
     <string name="kyc_decl_own_behalf">I\'m opening this account for myself, not on behalf of someone else.</string>
     <string name="kyc_decl_purpose">I\'ll use the account mainly for my salary and everyday payments.</string>
     <string name="kyc_decl_salary">My money comes mainly from salary or other employment income.</string>
-    <string name="kyc_demo_note">Demo: the declarations are ticked for you and are not sent anywhere. A real bank would also screen your name against sanctions and PEP lists.</string>
+    <string name="kyc_demo_note">Demo: your declarations stay on this phone and are not sent anywhere. A real bank would also screen your name against sanctions and PEP lists.</string>
     <string name="kyc_continue">Confirm and continue</string>
     <string name="dashboard_kyc_title">Your KYC profile</string>
     <string name="dashboard_kyc_complete">✓ Complete</string>
