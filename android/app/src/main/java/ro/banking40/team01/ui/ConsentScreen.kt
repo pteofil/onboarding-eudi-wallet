@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -68,6 +69,7 @@ fun ConsentScreen(
                 Switch(checked = shareIncome, onCheckedChange = null)
             }
         }
+        KycNotice()
         Text(
             text = stringResource(R.string.consent_footer),
             style = MaterialTheme.typography.bodySmall,
@@ -75,6 +77,29 @@ fun ConsentScreen(
         )
         Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.consent_continue))
+        }
+    }
+}
+
+/** Tells the customer, before the wallet opens, that the shared identity and address also serve KYC. */
+@Composable
+private fun KycNotice() {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = stringResource(R.string.consent_kyc_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(stringResource(R.string.consent_kyc_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.consent_kyc_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
         }
     }
 }
