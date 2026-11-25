@@ -87,8 +87,10 @@ With `returnToApp=false` the user taps Close in the wallet and switches back; th
 ### Journeys in the app
 1. **Landing** (animated intro) -> **1 Become a client**: "Onboard with EUDI Wallet" or "Manual onboarding".
 2. **Wallet journey (the real one):** 2 Consent (what we ask and why; income switch off = `ONBOARD_BASIC`,
-   on = `ONBOARD_FULL`) -> 3 Wallet hand-off -> 4 Verifying -> 5 Review (verified data read-only, "Verified via
-   EUDI Wallet"; phone and email) -> 6 Your package (recommendation, reasons, insurance, other eligible packages,
+   on = `ONBOARD_FULL`; a box says the same data also completes KYC) -> 3 Wallet hand-off -> 4 Verifying -> 5 Review
+   (verified data read-only, "Verified via EUDI Wallet"; phone and email) -> 5b KYC (what the wallet verified, plus the
+   declarations no wallet can answer: PEP, tax residency, own behalf, purpose; source of funds too when income wasn't
+   shared) -> 6 Your package (recommendation, reasons, insurance, other eligible packages,
    not-eligible ones with the reason) -> 7 Confirm (terms, Sign) -> 8 Welcome -> Dashboard -> Log out.
 3. **Manual journey (contrast only):** two prefilled form screens -> "Application received, 2–3 working days".
    Nothing is sent; it shows what the wallet replaces (11 typed fields and 2 uploads vs 2 prefilled fields and 0 uploads).
@@ -131,4 +133,7 @@ verified data. Simulated:
 - The dashboard (balance 987.00 RON, card, quick actions, activity) is demo data; quick actions and Help show
   "not available in this demo"
 - The manual onboarding path is a prefilled mock-up; nothing is submitted
+- KYC declarations (PEP, tax residency/FATCA-CRS, own behalf, purpose, source of funds) are pre-ticked and stay in
+  the app; there is no sanctions or PEP list screening. The dashboard's KYC profile is built from the verified review
+  data plus these declarations, in memory only
 - Stub mode (`stub=true`, backend `ALLOW_STUB=1`) returns fixed test data for UI work only and is marked TEST DATA
