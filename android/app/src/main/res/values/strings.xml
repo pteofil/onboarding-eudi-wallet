@@ -2,7 +2,7 @@
 <!-- All customer-facing copy lives here. Flash Bank is fictional. -->
 <resources>
     <string name="app_name">Flash Bank</string>
-    <string name="solution_name">Verified Onboarding</string>
+    <string name="solution_name">Skip the Line Onboarding</string>
 
     <!-- Landing (animated intro) -->
     <string name="landing_tagline">Open your account in minutes.\nShare verified details from your EUDI Wallet, nothing to type.</string>

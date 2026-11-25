@@ -1,4 +1,4 @@
-# Verified Onboarding: Flash team
+# Skip the Line Onboarding: Flash team
 
 Bank onboarding with the EUDI Wallet for Flash Bank, a fictional bank: the customer shares verified identity, address
 and (optionally) income from the wallet; nothing is typed. Banking 4.0 EUDI Wallet hackathon, Team 01 (Flash team).
