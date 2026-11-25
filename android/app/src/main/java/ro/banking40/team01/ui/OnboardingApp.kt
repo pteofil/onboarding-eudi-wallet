@@ -84,6 +84,17 @@ fun OnboardingApp(viewModel: OnboardingViewModel) {
                         onContinue = viewModel::continueFromReview,
                     )
                 }
+                Screen.Kyc -> state.review?.let { review ->
+                    KycScreen(
+                        identity = review.identity,
+                        maskedCnp = review.personalNumericCode,
+                        address = review.address,
+                        incomeVerified = review.incomeShared,
+                        declarations = state.kyc,
+                        onChange = viewModel::updateKyc,
+                        onContinue = viewModel::continueFromKyc,
+                    )
+                }
                 Screen.Package -> state.review?.let { review ->
                     PackageScreen(
                         decision = review.decision,

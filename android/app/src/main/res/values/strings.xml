@@ -2,7 +2,7 @@
 <!-- All customer-facing copy lives here. Flash Bank is fictional. -->
 <resources>
     <string name="app_name">Flash Bank</string>
-    <string name="solution_name">Verified Onboarding</string>
+    <string name="solution_name">Skip the Line Onboarding</string>
 
     <!-- Landing (animated intro) -->
     <string name="landing_tagline">Open your account in minutes.\nShare verified details from your EUDI Wallet, nothing to type.</string>
@@ -84,6 +84,47 @@
     <string name="trust_failed">failed</string>
     <string name="trust_not_shared">not shared</string>
     <string name="trust_skipped">skipped</string>
+
+    <!-- 5b KYC (draft copy, for Dana) -->
+    <string name="consent_kyc_label">Know your customer (KYC)</string>
+    <string name="consent_kyc_title">Your wallet details also complete your KYC check</string>
+    <string name="consent_kyc_body">The law requires us to verify every new customer. Your verified identity and address do that for us: no ID photo, selfie or video call. Afterwards you\'ll confirm a few short declarations.</string>
+    <string name="kyc_title">Know your customer (KYC)</string>
+    <string name="kyc_body">Your EUDI Wallet has already verified most of what the law asks us to check. Please confirm the rest.</string>
+    <string name="kyc_progress">%1$d of %2$d KYC checks done</string>
+    <string name="kyc_verified_section">From your wallet</string>
+    <string name="kyc_verified_hint">You reviewed these on the previous screen. Nothing to type or upload.</string>
+    <string name="kyc_declarations_section">Your declarations</string>
+    <string name="kyc_name">Name</string>
+    <string name="kyc_birth_date">Date of birth</string>
+    <string name="kyc_cnp">Personal identification number (CNP)</string>
+    <string name="kyc_cnp_short">CNP</string>
+    <string name="kyc_nationality">Nationality</string>
+    <string name="kyc_address">Home address</string>
+    <string name="kyc_source_of_funds">Source of funds</string>
+    <string name="kyc_pep">Politically exposed person</string>
+    <string name="kyc_tax_residency">Tax residency</string>
+    <string name="kyc_acting_for">Account opened for</string>
+    <string name="kyc_purpose">Main use of the account</string>
+    <string name="kyc_value_salary_verified">Salary (verified income)</string>
+    <string name="kyc_value_salary">Salary</string>
+    <string name="kyc_value_no">No</string>
+    <string name="kyc_value_romania_only">Romania only</string>
+    <string name="kyc_value_myself">Myself</string>
+    <string name="kyc_value_everyday">Salary and everyday payments</string>
+    <string name="kyc_source_wallet">EUDI Wallet</string>
+    <string name="kyc_source_declared">Declared</string>
+    <string name="kyc_decl_not_pep">I\'m not a politically exposed person (PEP), nor a family member or close associate of one.</string>
+    <string name="kyc_decl_tax">I\'m tax resident only in Romania and I\'m not a US person (FATCA/CRS).</string>
+    <string name="kyc_decl_own_behalf">I\'m opening this account for myself, not on behalf of someone else.</string>
+    <string name="kyc_decl_purpose">I\'ll use the account mainly for my salary and everyday payments.</string>
+    <string name="kyc_decl_salary">My money comes mainly from salary or other employment income.</string>
+    <string name="kyc_demo_note">Demo: your declarations stay on this phone and are not sent anywhere. A real bank would also screen your name against sanctions and PEP lists.</string>
+    <string name="kyc_continue">Confirm and continue</string>
+    <string name="dashboard_kyc_title">Your KYC profile</string>
+    <string name="dashboard_kyc_complete">✓ Complete</string>
+    <string name="dashboard_kyc_summary">%1$d details verified by your EUDI Wallet · %2$d declared by you</string>
+    <string name="dashboard_kyc_completed">Completed %1$s · no ID photo, selfie or video call</string>
 
     <!-- 6 Your package: the app's own strings; final copy is in the block from Dana below -->
     <string name="package_title">Your package</string>

@@ -44,6 +44,7 @@ sealed interface Screen {
     data object Handoff : Screen // 3 Wallet hand-off
     data object Verifying : Screen // 4 Verifying
     data object Review : Screen // 5 Review your details
+    data object Kyc : Screen // 5b KYC: wallet-verified part + declarations
     data object Package : Screen // 6 Your package
     data object Confirm : Screen // 7 Confirm
     data class Welcome(val confirmation: ConfirmResponse?) : Screen // 8 Welcome
@@ -63,6 +64,7 @@ data class UiState(
     /** GET /review, loaded once the backend says VERIFIED. */
     val review: ReviewResponse? = null,
     val contact: Contact = Contact(),
+    val kyc: KycDeclarations = KycDeclarations(),
     /** Starts as the backend's recommendation; the customer may pick another eligible package. */
     val selectedPackage: String? = null,
     val termsAccepted: Boolean = false,
@@ -152,7 +154,8 @@ class OnboardingViewModel(
     fun back() = when (_state.value.screen) {
         Screen.Consent, Screen.FormDetails, Screen.FormSubmitted -> show(Screen.Start)
         Screen.FormAddress -> show(Screen.FormDetails)
-        Screen.Package -> show(Screen.Review)
+        Screen.Kyc -> show(Screen.Review)
+        Screen.Package -> show(Screen.Kyc)
         Screen.Confirm -> if (!_state.value.signing) show(Screen.Package) else Unit
         else -> reset()
     }
@@ -169,7 +172,14 @@ class OnboardingViewModel(
         updateContact { it.copy(otp = otp.filter(Char::isDigit).take(Contact.OTP_LENGTH)) }
 
     fun continueFromReview() {
-        if (_state.value.contact.complete) show(Screen.Package)
+        if (_state.value.contact.complete) show(Screen.Kyc)
+    }
+
+    fun updateKyc(declarations: KycDeclarations) = _state.update { it.copy(kyc = declarations) }
+
+    fun continueFromKyc() {
+        val state = _state.value
+        if (state.kyc.complete(incomeVerified = state.review?.incomeShared == true)) show(Screen.Package)
     }
 
     /** Only packages the backend listed as eligible can be picked. */
@@ -326,7 +336,11 @@ class OnboardingViewModel(
             // The verified details are no longer needed once the account is opened.
             val seconds = journeyStartedAt?.let { (System.currentTimeMillis() - it) / 1000 }
             _state.update {
-                val identity = it.review?.identity
+                val review = it.review
+                val identity = review?.identity
+                val kyc = review?.let { r ->
+                    KycProfile(r.identity, r.personalNumericCode, r.address, r.incomeShared, it.kyc, System.currentTimeMillis())
+                }
                 val account = Account(
                     firstName = identity?.givenName?.let(::displayName),
                     fullName = listOfNotNull(identity?.givenName, identity?.familyName).joinToString(" ").ifBlank { null },
@@ -334,6 +348,7 @@ class OnboardingViewModel(
                     iban = confirmation.iban,
                     reference = confirmation.reference,
                     onboardingSeconds = seconds,
+                    kyc = kyc,
                 )
                 UiState(screen = Screen.Welcome(confirmation), shareIncome = it.shareIncome, account = account)
             }

@@ -53,6 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ro.banking40.team01.R
 import ro.banking40.team01.onboarding.Account
+import ro.banking40.team01.onboarding.KycProfile
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import ro.banking40.team01.ui.theme.BrandMint
 import ro.banking40.team01.ui.theme.BrandNavy
 import ro.banking40.team01.ui.theme.BrandTeal
@@ -75,6 +80,7 @@ fun DashboardScreen(account: Account, onLogout: () -> Unit, onNotInDemo: () -> U
         ) {
             QuickActions(onNotInDemo)
             PackageSummary(account)
+            account.kyc?.let { KycCard(it) }
             Activity()
             Spacer(Modifier.height(8.dp))
         }
@@ -282,6 +288,45 @@ private fun PackageSummary(account: Account) {
             LabeledValue(stringResource(R.string.welcome_iban), account.iban.chunked(4).joinToString(" "))
             Text(
                 stringResource(R.string.dashboard_reference, account.reference),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+    }
+}
+
+/** The KYC record the onboarding produced: what the wallet verified and what the customer declared. */
+@Composable
+private fun KycCard(kyc: KycProfile) {
+    val verified = walletKycItems(kyc.identity, kyc.maskedCnp, kyc.address, kyc.incomeVerified)
+    val declared = declaredKycItems(kyc.incomeVerified)
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.dashboard_kyc_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White,
+                    shape = CircleShape,
+                ) {
+                    Text(
+                        stringResource(R.string.dashboard_kyc_complete),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    )
+                }
+            }
+            KycSummary(stringResource(R.string.dashboard_kyc_summary, verified.size, declared.size))
+            verified.forEach { KycLine(it.label, it.value, fromWallet = true) }
+            declared.forEach { (label, value) -> KycLine(label, value, fromWallet = false) }
+            val completedOn = Instant.ofEpochMilli(kyc.completedAtMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+            Text(
+                stringResource(R.string.dashboard_kyc_completed, completedOn),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary,
             )
